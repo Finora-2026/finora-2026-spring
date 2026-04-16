@@ -2,12 +2,17 @@ package com.bellamyphan.finora_2026_spring.controller;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/test-db")
+@CrossOrigin(origins = {
+        "http://localhost:5173",
+        "https://bellamyphan.com"
+})
 @RequiredArgsConstructor
 public class DbTestController {
 
