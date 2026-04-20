@@ -16,6 +16,8 @@ jobs:
       DB_URL: ${{ secrets.DB_URL }}
       DB_USERNAME: ${{ secrets.DB_USERNAME }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_URL_MONGO: ${{ secrets.DB_URL_MONGO }}
+      DB_DATABASE_MONGO: ${{ secrets.DB_DATABASE_MONGO }}
 
     steps:
       # Checkout the code from your repository
