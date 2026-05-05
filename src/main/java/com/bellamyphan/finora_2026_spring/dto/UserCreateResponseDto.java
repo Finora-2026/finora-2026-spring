@@ -1,6 +1,5 @@
 package com.bellamyphan.finora_2026_spring.dto;
 
-import com.bellamyphan.finora_2026_spring.entity.Role;
 import com.bellamyphan.finora_2026_spring.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
