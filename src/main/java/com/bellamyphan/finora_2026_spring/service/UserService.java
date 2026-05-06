@@ -66,4 +66,8 @@ public class UserService {
     public Optional<User> findById(String id) {
         return userRepository.findById(id);
     }
+
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmailIgnoreCase(email);
+    }
 }
