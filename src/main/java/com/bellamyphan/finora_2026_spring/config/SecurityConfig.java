@@ -44,9 +44,9 @@ public class SecurityConfig {
                 // Authorization rules
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
-                        .requestMatchers("/test-db", "/auth/**").permitAll()
+                        .requestMatchers("/test-db", "/movies/**", "/auth/**").permitAll()
 
-                        // Allow public registration (POST /api/users)
+                        // Allow user to register new account (POST /api/users)
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
 
                         // USER role can access those api url
