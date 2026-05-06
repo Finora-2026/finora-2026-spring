@@ -21,7 +21,7 @@ public class UserService {
     private final RoleRepository roleRepository;
 
     @Transactional
-    public User createUser(UserCreateRequestDto userDto) {
+    public User createUser(UserCreateRequestDto userDto, RoleEnum forcedRole) {
 
         // 1. Validate email
         if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {
@@ -39,23 +39,14 @@ public class UserService {
             throw new IllegalArgumentException("Password cannot be empty");
         }
 
-        // 4. Convert role string to RoleEnum, default to ROLE_USER
-        RoleEnum roleEnum;
-        try {
-            if (userDto.getRole() == null || userDto.getRole().isBlank()) {
-                roleEnum = RoleEnum.ROLE_USER;
-            } else {
-                roleEnum = RoleEnum.valueOf(userDto.getRole());
-            }
-        } catch (IllegalArgumentException ex) {
-            // Invalid role string -> default to ROLE_USER
-            roleEnum = RoleEnum.ROLE_USER;
-        }
+        // 4. Get the role, default to ROLE_USER
+        RoleEnum finalRole = (forcedRole != null)
+                ? forcedRole
+                : RoleEnum.ROLE_USER;
 
         // 5. Fetch role entity from DB, default to ROLE_USER if not found
-        Role role = roleRepository.findByName(roleEnum)
-                .orElseGet(() -> roleRepository.findByName(RoleEnum.ROLE_USER)
-                        .orElseThrow(() -> new RuntimeException("ROLE_USER not found in DB")));
+        Role role = roleRepository.findByName(finalRole)
+                .orElseThrow(() -> new RuntimeException("Role not found in DB"));
 
         // 6. Create User entity
         User user = new User();

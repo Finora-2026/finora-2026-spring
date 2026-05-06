@@ -48,10 +48,9 @@ public class DataInitializerRunner implements CommandLineRunner {
             UserCreateRequestDto adminDto = new UserCreateRequestDto(
                     props.getAdmin().getName(),
                     props.getAdmin().getEmail(),
-                    props.getAdmin().getPassword(),
-                    RoleEnum.ROLE_ADMIN.name()
+                    props.getAdmin().getPassword()
             );
-            userService.createUser(adminDto);
+            userService.createUser(adminDto, RoleEnum.ROLE_ADMIN);
             logger.info("✅ Default ADMIN account created: {}", adminDto.getEmail());
         } catch (IllegalArgumentException e) {
             logger.info("ℹ️ ADMIN account already exists or invalid: {}", e.getMessage());
@@ -65,10 +64,9 @@ public class DataInitializerRunner implements CommandLineRunner {
             UserCreateRequestDto userDto = new UserCreateRequestDto(
                     props.getUser().getName(),
                     props.getUser().getEmail(),
-                    props.getUser().getPassword(),
-                    RoleEnum.ROLE_USER.name()
+                    props.getUser().getPassword()
             );
-            userService.createUser(userDto);
+            userService.createUser(userDto, RoleEnum.ROLE_USER);
             logger.info("✅ Default USER account created: {}", userDto.getEmail());
         } catch (IllegalArgumentException e) {
             logger.info("ℹ️ USER account already exists or invalid: {}", e.getMessage());
