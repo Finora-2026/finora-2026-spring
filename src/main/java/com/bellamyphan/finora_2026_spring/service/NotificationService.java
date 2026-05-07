@@ -39,7 +39,7 @@ public class NotificationService {
 
     /**
      * Sends a rich notification when the server boots up.
-     * @Async ensures this doesn't delay the actual application availability.
+     * Async ensures this doesn't delay the actual application availability.
      */
     @Async
     public void sendStartupNotification() {
