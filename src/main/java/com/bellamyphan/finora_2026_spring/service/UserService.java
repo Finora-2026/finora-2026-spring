@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -69,5 +70,9 @@ public class UserService {
 
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmailIgnoreCase(email);
+    }
+
+    public List<User> findAllActiveAdmins() {
+        return userRepository.findAllByRoleNameAndIsActiveTrue(RoleEnum.ROLE_ADMIN);
     }
 }

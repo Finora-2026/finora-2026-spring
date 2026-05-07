@@ -25,6 +25,8 @@ jobs:
       USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
       USER_NAME: ${{ secrets.USER_EMAIL }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      MAILGUN_LOGIN: ${{ secrets.MAILGUN_LOGIN }}
+      MAILGUN_PASSWORD: ${{ secrets.MAILGUN_PASSWORD }}
 
     steps:
       # Checkout the code from your repository

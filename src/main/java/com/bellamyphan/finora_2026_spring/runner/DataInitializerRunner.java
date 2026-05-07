@@ -10,10 +10,12 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Order(1)
 public class DataInitializerRunner implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(DataInitializerRunner.class);
