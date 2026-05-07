@@ -54,8 +54,7 @@ public class NotificationService {
      * Heartbeat notification every 24 hours.
      * Send periodic update every 24 hours, but skip first execution.
      */
-//    @Scheduled(fixedRateString = "PT24H", initialDelayString = "PT24H")
-    @Scheduled(fixedRateString = "PT20S", initialDelayString = "PT20S")
+    @Scheduled(fixedRateString = "PT24H", initialDelayString = "PT24H")
     @Async
     public void sendDailyStatusNotification() {
         logger.info("Preparing daily status heartbeat...");
