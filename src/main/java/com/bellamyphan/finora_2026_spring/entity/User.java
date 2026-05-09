@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -35,8 +35,11 @@ public class User {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
+    @Column(name = "is_demo", nullable = false)
+    private boolean isDemo = false;
+
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     // Constructor without id (id can be generated in service layer)
     public User(String name, String email, String passwordHashed, Role role) {
@@ -49,8 +52,9 @@ public class User {
     @PrePersist
     public void prePersist() {
         if (createdAt == null) {
-            createdAt = LocalDate.now();
+            createdAt = LocalDateTime.now();
         }
+
         setEmail(email);
     }
 
@@ -59,9 +63,10 @@ public class User {
         setEmail(email);
     }
 
-    // Override setter to force lowercase
+    // Force lowercase email
     public void setEmail(String email) {
-        this.email = (email != null) ? email.toLowerCase() : null;
+        this.email = (email != null)
+                ? email.trim().toLowerCase()
+                : null;
     }
-
 }

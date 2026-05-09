@@ -4,7 +4,7 @@ import com.bellamyphan.finora_2026_spring.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Data
@@ -14,7 +14,8 @@ public class UserCreateResponseDto {
     private String email;
     private String role;
     private boolean isActive;
-    private LocalDate createdAt;
+    private boolean isDemo;
+    private LocalDateTime createdAt;
 
     // ==========================
     // Convert Entity → DTO
@@ -26,6 +27,7 @@ public class UserCreateResponseDto {
                         u.getEmail(),
                         u.getRole().getName().toString(),
                         u.isActive(),
+                        u.isDemo(),
                         u.getCreatedAt()
                         ))
                 .orElse(null);

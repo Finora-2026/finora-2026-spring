@@ -79,7 +79,7 @@ public class NotificationService {
         for (User admin : admins) {
             try {
                 emailService.sendEmail(admin.getEmail(), subject, body);
-                logger.info("Notification sent to Admin: {}", admin.getEmail());
+                logger.info("Notification ({}) sent to Admin: {}", subject, admin.getEmail());
             } catch (Exception ex) {
                 // Log the actual exception so you can see if it's a Mailgun Auth or Network issue
                 logger.error("❌ Failed to send notification [{}]: {}", subject, ex.getMessage(), ex);
