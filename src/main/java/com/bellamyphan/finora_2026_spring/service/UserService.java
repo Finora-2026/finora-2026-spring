@@ -7,15 +7,22 @@ import com.bellamyphan.finora_2026_spring.entity.User;
 import com.bellamyphan.finora_2026_spring.repository.RoleRepository;
 import com.bellamyphan.finora_2026_spring.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private final PasswordService passwordService;
     private final NanoIdService nanoIdService;
@@ -89,6 +96,23 @@ public class UserService {
         String id = nanoIdService.generateUniqueId(userRepository);
         user.setId(id);
         return userRepository.save(user);
+    }
+
+    /**
+     * Delete expired demo users every 48 hours.
+     */
+    @Scheduled(fixedRateString = "PT48H", initialDelayString = "PT48H")
+    @Async
+    @Transactional
+    public void deleteExpiredDemoUsers() {
+
+        logger.info("Starting demo user cleanup every 48 hours...");
+
+        LocalDateTime cutoff = LocalDateTime.now().minusHours(48);
+
+        int deletedCount = userRepository.deleteExpiredDemoUsers(cutoff);
+
+        logger.info("Deleted {} expired demo users.", deletedCount);
     }
 
     public Optional<User> findById(String id) {
