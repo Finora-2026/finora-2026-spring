@@ -26,7 +26,7 @@ public class EmailServiceRunner implements CommandLineRunner {
 
         try {
             notificationService.sendStartupNotification();
-            logger.info("Startup notification sent successfully.");
+            logger.info("Startup notification scheduled to sent in runner.");
         } catch (Exception ex) {
             logger.warn("Failed to send startup email notification: {}", ex.getMessage());
         }
