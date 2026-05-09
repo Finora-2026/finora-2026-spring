@@ -49,7 +49,7 @@ public class UserService {
 
         // 5. Fetch role entity from DB, default to ROLE_USER if not found
         Role role = roleRepository.findByName(finalRole)
-                .orElseThrow(() -> new RuntimeException("Role not found in DB"));
+                .orElseThrow(() -> new RuntimeException("Role not found in DB: " +  finalRole.name()));
 
         // 6. Create User entity
         User user = new User();
@@ -64,6 +64,33 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
+    public User createDemoUser() {
+
+        // 1. Generate unique email (no validation needed against input)
+        String email = generateDemoEmail();
+
+        // 2. Generate random password (never returned)
+        String rawPassword = generateDemoPassword();
+
+        // 3. Get default role (same as normal users)
+        Role role = roleRepository.findByName(RoleEnum.ROLE_USER)
+                .orElseThrow(() -> new RuntimeException("ROLE_USER not found in DB"));
+
+        // 4. Create user
+        User user = new User();
+        user.setName("Demo User");
+        user.setEmail(email);
+        user.setPasswordHashed(passwordService.hash(rawPassword));
+        user.setRole(role);
+        user.setDemo(true);
+
+        // 5. Generate ID
+        String id = nanoIdService.generateUniqueId(userRepository);
+        user.setId(id);
+        return userRepository.save(user);
+    }
+
     public Optional<User> findById(String id) {
         return userRepository.findById(id);
     }
@@ -74,5 +101,13 @@ public class UserService {
 
     public List<User> findAllActiveAdmins() {
         return userRepository.findAllByRoleNameAndIsActiveTrue(RoleEnum.ROLE_ADMIN);
+    }
+
+    private String generateDemoEmail() {
+        return "demo_" + java.util.UUID.randomUUID() + "@finora.local";
+    }
+
+    private String generateDemoPassword() {
+        return "demo_" + java.util.UUID.randomUUID();
     }
 }
