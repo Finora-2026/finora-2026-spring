@@ -26,4 +26,14 @@ public class AuthController {
                     .body(e.getMessage());
         }
     }
+
+    @PostMapping("/login-demo")
+    public ResponseEntity<?> loginDemo() {
+        try {
+            return ResponseEntity.ok(authService.loginDemo());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(e.getMessage());
+        }
+    }
 }

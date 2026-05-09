@@ -39,4 +39,18 @@ public class AuthService {
 
         return new LogInResponseDto(true, token);
     }
+
+    public LogInResponseDto loginDemo() {
+
+        User demoUser = userService.createDemoUser();
+
+        // Generate JWT immediately
+        String token = jwtService.generateToken(
+                demoUser.getEmail(),
+                demoUser.getId(),
+                demoUser.getRole().getName()
+        );
+
+        return new LogInResponseDto(true, token);
+    }
 }
