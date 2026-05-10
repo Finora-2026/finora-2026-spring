@@ -61,4 +61,13 @@ public class AccountController {
         User user = jwtService.getCurrentUser();
         return accountService.findActiveAccountsByUser(user);
     }
+
+    // -----------------------
+    // GET inactive accounts (closingDate != null)
+    // -----------------------
+    @GetMapping("/inactive")
+    public List<AccountResponseDto> getInactiveAccountsByUser() {
+        User user = jwtService.getCurrentUser();
+        return accountService.findInactiveAccountsByUser(user);
+    }
 }
