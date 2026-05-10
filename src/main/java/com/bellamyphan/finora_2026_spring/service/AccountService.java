@@ -10,6 +10,7 @@ import com.bellamyphan.finora_2026_spring.repository.AccountRepository;
 import com.bellamyphan.finora_2026_spring.repository.AccountTypeRepository;
 import com.bellamyphan.finora_2026_spring.repository.BankRepository;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,13 +61,34 @@ public class AccountService {
     /**
      * Find all accounts belonging to a given user
      */
-    public List<AccountResponseDto> findAccountsByUser(User user) {
+    public List<AccountResponseDto> findAllAccountByUser(User user) {
         if (user == null) {
             throw new IllegalArgumentException("User cannot be null");
         }
         List<Account> accounts = accountRepository.findByUser(user).stream()
                 .sorted((b1, b2) -> b1.getBank().getName().compareToIgnoreCase(b2.getBank().getName()))
                 .toList();
+        return getAccountResponseDtos(accounts);
+    }
+
+    /**
+     * Find active accounts for a user (closingDate == null)
+     */
+    public List<AccountResponseDto> findActiveAccountsByUser(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+
+        List<Account> accounts = accountRepository.findByUser(user).stream()
+                .filter(account -> account.getClosingDate() == null) // only active accounts
+                .sorted((b1, b2) -> b1.getBank().getName().compareToIgnoreCase(b2.getBank().getName()))
+                .toList();
+
+        return getAccountResponseDtos(accounts);
+    }
+
+    @NonNull
+    private List<AccountResponseDto> getAccountResponseDtos(List<Account> accounts) {
         return accounts.stream()
                 .map(account -> {
                     // Todo: Calculate this amount later
@@ -86,5 +108,6 @@ public class AccountService {
                 })
                 .collect(Collectors.toList());
     }
+
 
 }
