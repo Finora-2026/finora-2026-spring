@@ -1,10 +1,13 @@
 package com.bellamyphan.finora_2026_spring.service;
 
+import com.bellamyphan.finora_2026_spring.dto.BankResponseDto;
 import com.bellamyphan.finora_2026_spring.entity.Bank;
 import com.bellamyphan.finora_2026_spring.repository.BankRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +18,11 @@ public class BankService {
 
     public boolean existsByName(String name) {
         return bankRepository.existsByNameIgnoreCase(name);
+    }
+
+    public List<BankResponseDto> getAllBanks() {
+        List<Bank> banks = bankRepository.findAll();
+        return banks.stream().map(BankResponseDto::fromEntity).toList();
     }
 
     @Transactional

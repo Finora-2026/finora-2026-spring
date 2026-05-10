@@ -51,7 +51,8 @@ public class SecurityConfig {
 
                         // USER role can access those api url
                         .requestMatchers(
-                                "/accounts/**"
+                                "/accounts/**",
+                                "/banks/**"
                         )
                         .hasRole("USER")
 
