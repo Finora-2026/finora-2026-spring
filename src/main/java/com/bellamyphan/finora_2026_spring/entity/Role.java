@@ -3,12 +3,14 @@ package com.bellamyphan.finora_2026_spring.entity;
 import com.bellamyphan.finora_2026_spring.constant.RoleEnum;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "roles")
-@Data // Lombok will generate getters, setters, toString, equals, and hashCode methods
+@Getter
+@Setter
 @NoArgsConstructor
 public class Role {
 

@@ -2,14 +2,16 @@ package com.bellamyphan.finora_2026_spring.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-@Data // Lombok annotation to generate getters, setters, equals, hashCode, and toString methods
+@Getter
+@Setter
 @NoArgsConstructor
 public class User {
 
