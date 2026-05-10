@@ -29,10 +29,12 @@ public class AccountService {
     public Account createAccount(AccountEditDto accountEditDto, User user) {
 
         Bank bank = bankRepository.findById(accountEditDto.getBankId())
-                .orElseThrow(() -> new RuntimeException("Bank group not found: " + accountEditDto.getBankId()));
+                .orElseThrow(() -> new RuntimeException(
+                        "Bank group not found: " + accountEditDto.getBankId()));
 
-        AccountType type = accountTypeRepository.findByName(accountEditDto.getType())
-                .orElseThrow(() -> new RuntimeException("Account type not found: " + accountEditDto.getType().name()));
+        AccountType type = accountTypeRepository.findById(accountEditDto.getTypeId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Account type not found for this typeId: " + accountEditDto.getTypeId()));
 
         Account account = new Account(
                 accountEditDto.getName(),
