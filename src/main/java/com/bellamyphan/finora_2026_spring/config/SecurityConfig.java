@@ -50,14 +50,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
 
                         // USER role can access those api url
-                        .requestMatchers("/transactions/**",
-                                "/banks/**",
-                                "/bank-groups/**",
-                                "/brands/**",
-                                "/locations/**",
-                                "/transaction-groups/**",
-                                "/repeat-groups/**",
-                                "/reports/**")
+                        .requestMatchers(
+                                "/accounts/**"
+                        )
                         .hasRole("USER")
 
                         // SUPPORT role can access those api url
