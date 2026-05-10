@@ -48,8 +48,17 @@ public class AccountController {
     // GET all accounts by user token
     // -----------------------
     @GetMapping
-    public List<AccountResponseDto> getAccountsByUser() {
+    public List<AccountResponseDto> getAllAccountsByUser() {
         User user = jwtService.getCurrentUser();
-        return accountService.findAccountsByUser(user);
+        return accountService.findAllAccountByUser(user);
+    }
+
+    // -----------------------
+    // GET active accounts (closingDate == null)
+    // -----------------------
+    @GetMapping("/active")
+    public List<AccountResponseDto> getActiveAccountsByUser() {
+        User user = jwtService.getCurrentUser();
+        return accountService.findActiveAccountsByUser(user);
     }
 }
