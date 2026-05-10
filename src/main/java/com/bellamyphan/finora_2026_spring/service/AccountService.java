@@ -87,6 +87,22 @@ public class AccountService {
         return getAccountResponseDtos(accounts);
     }
 
+    /**
+     * Find inactive accounts for a user (closingDate != null)
+     */
+    public List<AccountResponseDto> findInactiveAccountsByUser(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+
+        List<Account> accounts = accountRepository.findByUser(user).stream()
+                .filter(account -> account.getClosingDate() != null) // only inactive accounts
+                .sorted((b1, b2) -> b1.getBank().getName().compareToIgnoreCase(b2.getBank().getName()))
+                .toList();
+
+        return getAccountResponseDtos(accounts);
+    }
+
     @NonNull
     private List<AccountResponseDto> getAccountResponseDtos(List<Account> accounts) {
         return accounts.stream()
