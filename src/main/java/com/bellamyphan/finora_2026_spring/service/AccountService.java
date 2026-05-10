@@ -1,6 +1,7 @@
 package com.bellamyphan.finora_2026_spring.service;
 
 import com.bellamyphan.finora_2026_spring.dto.AccountEditDto;
+import com.bellamyphan.finora_2026_spring.dto.AccountResponseDto;
 import com.bellamyphan.finora_2026_spring.entity.Account;
 import com.bellamyphan.finora_2026_spring.entity.AccountType;
 import com.bellamyphan.finora_2026_spring.entity.Bank;
@@ -11,6 +12,10 @@ import com.bellamyphan.finora_2026_spring.repository.BankRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -52,5 +57,34 @@ public class AccountService {
         return account;
     }
 
+    /**
+     * Find all accounts belonging to a given user
+     */
+    public List<AccountResponseDto> findAccountsByUser(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+        List<Account> accounts = accountRepository.findByUser(user).stream()
+                .sorted((b1, b2) -> b1.getBank().getName().compareToIgnoreCase(b2.getBank().getName()))
+                .toList();
+        return accounts.stream()
+                .map(account -> {
+                    // Todo: Calculate this amount later
+//                    BigDecimal pendingBalance = calculatePendingBalance(account.getId());
+//                    BigDecimal postedBalance = calculatePostedBalance(account.getId());
+                    BigDecimal pendingBalance = new BigDecimal("0");
+                    BigDecimal postedBalance = new BigDecimal("0");
+                    return new AccountResponseDto(
+                            account.getId(),
+                            account.getName(),
+                            account.getBank().getId(),
+                            account.getAccountType().getName(),
+                            account.getUser().getEmail(),
+                            pendingBalance,
+                            postedBalance
+                    );
+                })
+                .collect(Collectors.toList());
+    }
 
 }
