@@ -16,6 +16,7 @@ public class AccountResponseDto {
     private String id;
     private String name;
     private String bankId;
+    private String bankName;
     private AccountTypeEnum type;
     private String email;
     private BigDecimal pendingBalance;
@@ -28,6 +29,7 @@ public class AccountResponseDto {
                 account.getId(),
                 account.getName(),
                 account.getBank() != null ? account.getBank().getId() : null,
+                account.getBank() != null ? account.getBank().getName() : null,
                 account.getAccountType() != null ? account.getAccountType().getName() : null,
                 account.getUser() != null ? account.getUser().getEmail() : null,
                 null, // pendingBalance, will be calculated from transactions

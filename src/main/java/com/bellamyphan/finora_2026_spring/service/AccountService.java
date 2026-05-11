@@ -116,6 +116,7 @@ public class AccountService {
                             account.getId(),
                             account.getName(),
                             account.getBank().getId(),
+                            account.getBank().getName(),
                             account.getAccountType().getName(),
                             account.getUser().getEmail(),
                             pendingBalance,
