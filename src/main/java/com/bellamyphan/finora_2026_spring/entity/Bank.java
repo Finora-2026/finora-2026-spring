@@ -19,7 +19,7 @@ public class Bank {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    @Column(name = "url", nullable = false)
+    @Column(name = "url", nullable = false, columnDefinition = "TEXT")
     private String url;
 
     // Constructor without id (id can be generated in service layer)
