@@ -1,7 +1,6 @@
 package com.bellamyphan.finora_2026_spring.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,12 +21,10 @@ public class User {
     @Column(name = "name", length = 50)
     private String name;
 
-    @Column(name = "email", nullable = false, unique = true, length = 60)
-    @NotBlank(message = "Email is required")
+    @Column(name = "email", nullable = false, length = 60)
     private String email;
 
     @Column(name = "password_hashed", nullable = false, length = 60)
-    @NotBlank(message = "Password is required")
     private String passwordHashed;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
@@ -41,7 +38,7 @@ public class User {
     private boolean isDemo = false;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     // Constructor without id (id can be generated in service layer)
     public User(String name, String email, String passwordHashed, Role role) {
@@ -51,24 +48,9 @@ public class User {
         this.role = role;
     }
 
-    @PrePersist
-    public void prePersist() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-
-        setEmail(email);
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        setEmail(email);
-    }
-
-    // Force lowercase email
     public void setEmail(String email) {
-        this.email = (email != null)
-                ? email.trim().toLowerCase()
-                : null;
+        this.email = (email == null)
+                ? null
+                : email.trim().toLowerCase();
     }
 }
