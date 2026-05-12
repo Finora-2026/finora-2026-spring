@@ -21,7 +21,7 @@ public class Account {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    @Column(name = "opening_date", nullable = false)
+    @Column(name = "opening_date", nullable = false, updatable = false)
     private LocalDateTime openingDate;
 
     @Column(name = "closing_date")
@@ -74,10 +74,6 @@ public class Account {
 
         if (name != null) {
             name = name.trim();
-        }
-
-        if (openingDate == null) {
-            openingDate = LocalDateTime.now();
         }
     }
 }

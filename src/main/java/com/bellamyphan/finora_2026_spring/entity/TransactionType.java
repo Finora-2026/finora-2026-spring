@@ -1,28 +1,23 @@
 package com.bellamyphan.finora_2026_spring.entity;
 
-import com.bellamyphan.finora_2026_spring.constant.RoleEnum;
+import com.bellamyphan.finora_2026_spring.constant.TransactionTypeEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "roles")
+@Table(name = "transaction_types")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Role {
+public class TransactionType {
 
     @Id
     @Column(name = "id", nullable = false, length = 10)
     private String id; // NanoID 10-char
 
     @Enumerated(EnumType.STRING) // Store enum as string in DB
-    @Column(name = "name", nullable = false, length = 50)
-    private RoleEnum name;
-
-    // Constructor with only enum (id can be generated separately)
-    public Role(RoleEnum name) {
-        this.name = name;
-    }
+    @Column(name = "name", nullable = false, length = 20)
+    private TransactionTypeEnum name;
 }

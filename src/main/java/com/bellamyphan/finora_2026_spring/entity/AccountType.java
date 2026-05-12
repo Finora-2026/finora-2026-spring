@@ -18,7 +18,7 @@ public class AccountType {
     private String id; // NanoID 10-char
 
     @Enumerated(EnumType.STRING) // Store enum as string
-    @Column(name = "name", nullable = false, unique = true, length = 15)
+    @Column(name = "name", nullable = false, length = 15)
     private AccountTypeEnum name;
 
     // Constructor with only enum (id generated separately)
