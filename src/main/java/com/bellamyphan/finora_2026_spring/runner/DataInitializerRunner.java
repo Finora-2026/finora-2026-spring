@@ -5,11 +5,9 @@ import com.bellamyphan.finora_2026_spring.constant.AccountTypeEnum;
 import com.bellamyphan.finora_2026_spring.constant.RoleEnum;
 import com.bellamyphan.finora_2026_spring.constant.TransactionTypeEnum;
 import com.bellamyphan.finora_2026_spring.dto.BrandCreateRequestDto;
+import com.bellamyphan.finora_2026_spring.dto.BrandCreateResponseDto;
 import com.bellamyphan.finora_2026_spring.dto.UserCreateRequestDto;
-import com.bellamyphan.finora_2026_spring.entity.AccountType;
-import com.bellamyphan.finora_2026_spring.entity.Bank;
-import com.bellamyphan.finora_2026_spring.entity.Role;
-import com.bellamyphan.finora_2026_spring.entity.TransactionType;
+import com.bellamyphan.finora_2026_spring.entity.*;
 import com.bellamyphan.finora_2026_spring.service.*;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -173,8 +171,8 @@ public class DataInitializerRunner implements CommandLineRunner {
 
             try {
                 BrandCreateRequestDto dto = new BrandCreateRequestDto(name, url);
-                brandService.createBrand(dto);
-                logger.info("✅ Brand created: {}", name);
+                BrandCreateResponseDto saved = brandService.createBrand(dto);
+                logger.info("✅ Brand created: {}", saved.getName());
             } catch (IllegalArgumentException e) {
                 logger.info("ℹ️ Brand already exists: {}", name);
             } catch (Exception e) {
