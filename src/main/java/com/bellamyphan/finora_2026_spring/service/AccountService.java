@@ -9,10 +9,12 @@ import com.bellamyphan.finora_2026_spring.entity.User;
 import com.bellamyphan.finora_2026_spring.repository.AccountRepository;
 import com.bellamyphan.finora_2026_spring.repository.AccountTypeRepository;
 import com.bellamyphan.finora_2026_spring.repository.BankRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Validated
 public class AccountService {
 
     private final NanoIdService nanoIdService;
@@ -32,7 +35,7 @@ public class AccountService {
      * Save a new account with unique 10-char ID
      */
     @Transactional
-    public Account createAccount(AccountEditDto accountEditDto, User user) {
+    public Account createAccount(@Valid AccountEditDto accountEditDto, User user) {
 
         Bank bank = bankRepository.findById(accountEditDto.getBankId())
                 .orElseThrow(() -> new RuntimeException(

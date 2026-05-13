@@ -3,18 +3,21 @@ package com.bellamyphan.finora_2026_spring.service;
 import com.bellamyphan.finora_2026_spring.dto.LogInRequestDto;
 import com.bellamyphan.finora_2026_spring.dto.LogInResponseDto;
 import com.bellamyphan.finora_2026_spring.entity.User;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Service
 @RequiredArgsConstructor
+@Validated
 public class AuthService {
 
     private final UserService userService;
     private final PasswordService passwordService;
     private final JwtService jwtService;
 
-    public LogInResponseDto login(LogInRequestDto dto) {
+    public LogInResponseDto login(@Valid LogInRequestDto dto) {
 
         User user = userService.findByEmail(
                 dto.getEmail().trim().toLowerCase()

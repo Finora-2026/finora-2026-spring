@@ -4,9 +4,7 @@ import com.bellamyphan.finora_2026_spring.config.DefaultAccountProperties;
 import com.bellamyphan.finora_2026_spring.constant.AccountTypeEnum;
 import com.bellamyphan.finora_2026_spring.constant.RoleEnum;
 import com.bellamyphan.finora_2026_spring.constant.TransactionTypeEnum;
-import com.bellamyphan.finora_2026_spring.dto.BrandCreateRequestDto;
-import com.bellamyphan.finora_2026_spring.dto.BrandCreateResponseDto;
-import com.bellamyphan.finora_2026_spring.dto.UserCreateRequestDto;
+import com.bellamyphan.finora_2026_spring.dto.*;
 import com.bellamyphan.finora_2026_spring.entity.*;
 import com.bellamyphan.finora_2026_spring.service.*;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +29,7 @@ public class DataInitializerRunner implements CommandLineRunner {
     private final RoleService roleService;
     private final UserService userService;
     private final BrandService brandService;
+    private final LocationService locationService;
     private final BankService bankService;
     private final TransactionTypeService transactionTypeService;
     private final AccountTypeService accountTypeService;
@@ -43,6 +42,7 @@ public class DataInitializerRunner implements CommandLineRunner {
         initAccountTypes();
         initTransactionTypes();
         initBrands();
+        initLocations();
         initBanks();
         createAdminAccount();
         createUserAccount();
@@ -147,6 +147,36 @@ public class DataInitializerRunner implements CommandLineRunner {
                 logger.info("✅ Transaction type created: {}", saved.getName().name());
             } else {
                 logger.info("ℹ️ Transaction type already exists: {}", typeEnum.name());
+            }
+        }
+    }
+
+    private void initLocations() {
+        Object[][] locations = {
+                {"Dallas", "Texas"},
+                {"Houston", "Texas"},
+                {"Austin", "Texas"},
+                {"San Antonio", "Texas"},
+                {"Fort Worth", "Texas"},
+                {"Los Angeles", "California"},
+                {"San Diego", "California"},
+                {"New York", "New York"},
+                {"Chicago", "Illinois"},
+                {"Phoenix", "Arizona"},
+        };
+
+        for (Object[] loc : locations) {
+            String city = (String) loc[0];
+            String state = (String) loc[1];
+
+            try {
+                LocationCreateRequestDto dto = new LocationCreateRequestDto(city, state);
+                LocationCreateResponseDto saved = locationService.createLocation(dto);
+                logger.info("✅ Location created: {}, {}", saved.getCity(), saved.getState());
+            } catch (IllegalArgumentException e) {
+                logger.info("ℹ️ Location already exists: {}, {}", city, state);
+            } catch (Exception e) {
+                logger.error("❌ Failed to create location: {}, {} -> {}", city, state, e.getMessage(), e);
             }
         }
     }
