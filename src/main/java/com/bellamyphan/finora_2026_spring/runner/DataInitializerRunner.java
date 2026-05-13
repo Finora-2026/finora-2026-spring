@@ -3,15 +3,15 @@ package com.bellamyphan.finora_2026_spring.runner;
 import com.bellamyphan.finora_2026_spring.config.DefaultAccountProperties;
 import com.bellamyphan.finora_2026_spring.constant.AccountTypeEnum;
 import com.bellamyphan.finora_2026_spring.constant.RoleEnum;
+import com.bellamyphan.finora_2026_spring.constant.TransactionTypeEnum;
 import com.bellamyphan.finora_2026_spring.dto.UserCreateRequestDto;
 import com.bellamyphan.finora_2026_spring.entity.AccountType;
 import com.bellamyphan.finora_2026_spring.entity.Bank;
 import com.bellamyphan.finora_2026_spring.entity.Role;
-import com.bellamyphan.finora_2026_spring.service.AccountTypeService;
-import com.bellamyphan.finora_2026_spring.service.BankService;
-import com.bellamyphan.finora_2026_spring.service.RoleService;
-import com.bellamyphan.finora_2026_spring.service.UserService;
+import com.bellamyphan.finora_2026_spring.entity.TransactionType;
+import com.bellamyphan.finora_2026_spring.service.*;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -32,14 +32,16 @@ public class DataInitializerRunner implements CommandLineRunner {
     private final RoleService roleService;
     private final UserService userService;
     private final BankService bankService;
+    private final TransactionTypeService transactionTypeService;
     private final AccountTypeService accountTypeService;
 
     private record BankSeed(String name, String url) {}
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String @NonNull ... args) {
         initRoles();
         initAccountTypes();
+        initTransactionTypes();
         initBanks();
         createAdminAccount();
         createUserAccount();
@@ -50,8 +52,8 @@ public class DataInitializerRunner implements CommandLineRunner {
             if (!roleService.existsByName(roleEnum)) {
                 Role role = new Role();
                 role.setName(roleEnum);
-                roleService.save(role);
-                logger.info("✅ Role created: {}", roleEnum.name());
+                Role saved = roleService.save(role);
+                logger.info("✅ Role created: {}", saved.getName().name());
             } else {
                 logger.info("ℹ️ Role already exists: {}", roleEnum.name());
             }
@@ -131,6 +133,19 @@ public class DataInitializerRunner implements CommandLineRunner {
                 logger.info("✅ Bank created: {}", created.getName());
             } else {
                 logger.info("ℹ️ Bank already exists: {}", bankSeed.name());
+            }
+        }
+    }
+
+    private void initTransactionTypes() {
+        for (TransactionTypeEnum typeEnum : TransactionTypeEnum.values()) {
+            if (!transactionTypeService.existsByType(typeEnum)) {
+                TransactionType type = new TransactionType();
+                type.setName(typeEnum);
+                TransactionType saved = transactionTypeService.save(type);
+                logger.info("✅ Transaction type created: {}", saved.getName().name());
+            } else {
+                logger.info("ℹ️ Transaction type already exists: {}", typeEnum.name());
             }
         }
     }
