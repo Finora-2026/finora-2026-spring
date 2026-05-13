@@ -6,6 +6,7 @@ import com.bellamyphan.finora_2026_spring.entity.Role;
 import com.bellamyphan.finora_2026_spring.entity.User;
 import com.bellamyphan.finora_2026_spring.repository.RoleRepository;
 import com.bellamyphan.finora_2026_spring.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Validated
 public class UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
@@ -31,7 +34,7 @@ public class UserService {
     private final RoleRepository roleRepository;
 
     @Transactional
-    public User createUser(UserCreateRequestDto userDto, RoleEnum forcedRole) {
+    public User createUser(@Valid UserCreateRequestDto userDto, RoleEnum forcedRole) {
 
         // 1. Validate email
         if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {

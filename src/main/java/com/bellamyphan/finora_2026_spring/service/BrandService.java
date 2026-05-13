@@ -4,12 +4,15 @@ import com.bellamyphan.finora_2026_spring.dto.BrandCreateRequestDto;
 import com.bellamyphan.finora_2026_spring.dto.BrandCreateResponseDto;
 import com.bellamyphan.finora_2026_spring.entity.Brand;
 import com.bellamyphan.finora_2026_spring.repository.BrandRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 @Service
 @RequiredArgsConstructor
+@Validated
 public class BrandService {
 
     private final NanoIdService nanoIdService;
@@ -17,7 +20,7 @@ public class BrandService {
     private final BrandRepository brandRepository;
 
     @Transactional
-    public BrandCreateResponseDto createBrand(BrandCreateRequestDto request) {
+    public BrandCreateResponseDto createBrand(@Valid BrandCreateRequestDto request) {
         // Normalize name and URL
         String normalizedName = request.getName().trim();
         String urlNormalized = request.getUrl() != null ? request.getUrl().trim().toLowerCase() : null;
