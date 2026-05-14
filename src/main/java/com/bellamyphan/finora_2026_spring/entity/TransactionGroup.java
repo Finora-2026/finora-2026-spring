@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name = "transaction_groups")
 @Getter
@@ -19,4 +21,8 @@ public class TransactionGroup {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "report_id", nullable = false, foreignKey = @ForeignKey(name = "fk_transaction_groups_report"))
     private Report report;
+
+    // Link to transactions
+    @OneToMany(mappedBy = "transactionGroup", fetch = FetchType.LAZY)
+    private List<Transaction> transactions;
 }

@@ -49,4 +49,7 @@ public class Transaction {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transaction_type_id", foreignKey = @ForeignKey(name = "fk_transactions_transaction_type"))
     private TransactionType transactionType;
+
+    @Column(name = "is_posted", nullable = false)
+    private boolean isPosted = false;
 }
