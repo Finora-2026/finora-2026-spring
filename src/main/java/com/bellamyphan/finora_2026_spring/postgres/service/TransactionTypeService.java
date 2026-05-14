@@ -25,4 +25,15 @@ public class TransactionTypeService {
         type.setId(newId);
         return transactionTypeRepository.save(type);
     }
+
+    public TransactionType findTransactionTypeById(String typeId) {
+        if (typeId == null || typeId.isBlank()) {
+            throw new IllegalArgumentException("TransactionType ID cannot be null or blank");
+        }
+
+        return transactionTypeRepository.findById(typeId)
+                .orElseThrow(() -> new RuntimeException(
+                        "TransactionType not found with this id: " + typeId
+                ));
+    }
 }
