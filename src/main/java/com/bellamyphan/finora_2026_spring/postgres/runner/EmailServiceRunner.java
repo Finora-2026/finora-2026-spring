@@ -1,0 +1,46 @@
+package com.bellamyphan.finora_2026_spring.postgres.runner;
+
+import com.bellamyphan.finora_2026_spring.postgres.config.AppEnvironmentInfo;
+import com.bellamyphan.finora_2026_spring.postgres.service.NotificationService;
+import lombok.AllArgsConstructor;
+import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@AllArgsConstructor
+@Order(2)
+public class EmailServiceRunner implements CommandLineRunner {
+
+    private static final Logger logger = LoggerFactory.getLogger(EmailServiceRunner.class);
+
+    private final NotificationService notificationService;
+    private final AppEnvironmentInfo appEnvironmentInfo;
+
+    @Override
+    public void run(String @NonNull ... args) {
+
+        logEnvironmentInfo();
+
+        try {
+            notificationService.sendStartupNotification();
+            logger.info("Startup notification scheduled to sent in runner.");
+        } catch (Exception ex) {
+            logger.warn("Failed to send startup email notification: {}", ex.getMessage());
+        }
+    }
+
+    private void logEnvironmentInfo() {
+        logger.info("====== ENVIRONMENT INFO TEST RUNNER ======");
+        try {
+            String info = appEnvironmentInfo.buildInfo();
+            logger.info("Environment Info:\n{}", info);
+        } catch (Exception ex) {
+            logger.error("Failed to gather environment info: {}", ex.getMessage(), ex);
+        }
+        logger.info("==========================================");
+    }
+}
