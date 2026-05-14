@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Validated
@@ -48,5 +50,12 @@ public class BrandService {
                 .orElseThrow(() -> new RuntimeException(
                         "Brand not found with this id: " + brandId
                 ));
+    }
+
+    public List<BrandCreateResponseDto> findAll() {
+        return brandRepository.findAll()
+                .stream()
+                .map(BrandCreateResponseDto::fromEntity)
+                .toList();
     }
 }
