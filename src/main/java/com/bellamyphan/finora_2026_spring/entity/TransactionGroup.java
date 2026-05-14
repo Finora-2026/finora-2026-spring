@@ -22,6 +22,9 @@ public class TransactionGroup {
     @JoinColumn(name = "report_id", nullable = false, foreignKey = @ForeignKey(name = "fk_transaction_groups_report"))
     private Report report;
 
+    @Column(name = "is_repeatable", nullable = false)
+    private boolean isRepeatable = false;
+
     // Link to transactions
     @OneToMany(mappedBy = "transactionGroup", fetch = FetchType.LAZY)
     private List<Transaction> transactions;
