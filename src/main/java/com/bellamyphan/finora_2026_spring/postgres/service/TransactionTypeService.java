@@ -1,11 +1,14 @@
 package com.bellamyphan.finora_2026_spring.postgres.service;
 
 import com.bellamyphan.finora_2026_spring.postgres.constant.TransactionTypeEnum;
+import com.bellamyphan.finora_2026_spring.postgres.dto.TransactionTypeDto;
 import com.bellamyphan.finora_2026_spring.postgres.entity.TransactionType;
 import com.bellamyphan.finora_2026_spring.postgres.repository.TransactionTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -35,5 +38,19 @@ public class TransactionTypeService {
                 .orElseThrow(() -> new RuntimeException(
                         "TransactionType not found with this id: " + typeId
                 ));
+    }
+
+    public List<TransactionTypeDto> findAll() {
+        return transactionTypeRepository.findAll()
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    private TransactionTypeDto toDto(TransactionType type) {
+        TransactionTypeDto dto = new TransactionTypeDto();
+        dto.setId(type.getId());
+        dto.setName(type.getName().name());
+        return dto;
     }
 }

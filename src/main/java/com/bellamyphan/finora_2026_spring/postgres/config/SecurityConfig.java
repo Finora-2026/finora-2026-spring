@@ -54,7 +54,8 @@ public class SecurityConfig {
                                 "/accounts/**",
                                 "/account-types/**",
                                 "/banks/**",
-                                "/transaction-groups/**"
+                                "/transaction-groups/**",
+                                "/transaction-types/**"
                         )
                         .hasRole("USER")
 
