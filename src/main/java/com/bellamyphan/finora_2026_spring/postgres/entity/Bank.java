@@ -22,12 +22,6 @@ public class Bank {
     @Column(name = "url", nullable = false, columnDefinition = "TEXT")
     private String url;
 
-    // Constructor without id (id can be generated in service layer)
-    public Bank(String name, String url) {
-        this.name = name;
-        this.url = url;
-    }
-
     @PrePersist
     public void prePersist() {
         normalizeFields();

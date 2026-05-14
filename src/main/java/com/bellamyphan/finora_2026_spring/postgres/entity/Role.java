@@ -21,8 +21,4 @@ public class Role {
     @Column(name = "name", nullable = false, length = 50)
     private RoleEnum name;
 
-    // Constructor with only enum (id can be generated separately)
-    public Role(RoleEnum name) {
-        this.name = name;
-    }
 }

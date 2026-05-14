@@ -3,6 +3,7 @@ package com.bellamyphan.finora_2026_spring.postgres.runner;
 import com.bellamyphan.finora_2026_spring.postgres.config.AppEnvironmentInfo;
 import com.bellamyphan.finora_2026_spring.postgres.service.NotificationService;
 import lombok.AllArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -20,7 +21,7 @@ public class EmailServiceRunner implements CommandLineRunner {
     private final AppEnvironmentInfo appEnvironmentInfo;
 
     @Override
-    public void run(String... args) {
+    public void run(String @NonNull ... args) {
 
         logEnvironmentInfo();
 

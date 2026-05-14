@@ -20,9 +20,4 @@ public class AccountType {
     @Enumerated(EnumType.STRING) // Store enum as string
     @Column(name = "name", nullable = false, length = 15)
     private AccountTypeEnum name;
-
-    // Constructor with only enum (id generated separately)
-    public AccountType(AccountTypeEnum name) {
-        this.name = name;
-    }
 }
