@@ -53,7 +53,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/accounts/**",
                                 "/account-types/**",
-                                "/banks/**"
+                                "/banks/**",
+                                "/transaction-groups/**"
                         )
                         .hasRole("USER")
 

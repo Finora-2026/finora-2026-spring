@@ -37,4 +37,15 @@ public class LocationService {
         location.setId(nanoIdService.generateUniqueId(locationRepository));
         return LocationCreateResponseDto.fromEntity(locationRepository.save(location));
     }
+
+    public Location findLocationById(String locationId) {
+        if (locationId == null || locationId.isBlank()) {
+            throw new IllegalArgumentException("Location ID cannot be null or blank");
+        }
+
+        return locationRepository.findById(locationId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Location not found with this id: " + locationId
+                ));
+    }
 }

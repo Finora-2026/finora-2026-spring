@@ -38,4 +38,15 @@ public class BrandService {
         brand.setId(nanoIdService.generateUniqueId(brandRepository));
         return BrandCreateResponseDto.fromEntity(brandRepository.save(brand));
     }
+
+    public Brand findBrandById(String brandId) {
+        if (brandId == null || brandId.isBlank()) {
+            throw new IllegalArgumentException("Brand ID cannot be null or blank");
+        }
+
+        return brandRepository.findById(brandId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Brand not found with this id: " + brandId
+                ));
+    }
 }

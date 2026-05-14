@@ -106,6 +106,17 @@ public class AccountService {
         return getAccountResponseDtos(accounts);
     }
 
+    public Account findAccountById(String accountId) {
+        if (accountId == null || accountId.isBlank()) {
+            throw new IllegalArgumentException("Account ID cannot be null or blank");
+        }
+
+        return accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Account not found with this id: " + accountId
+                ));
+    }
+
     @NonNull
     private List<AccountResponseDto> getAccountResponseDtos(List<Account> accounts) {
         return accounts.stream()
@@ -128,6 +139,4 @@ public class AccountService {
                 })
                 .collect(Collectors.toList());
     }
-
-
 }
