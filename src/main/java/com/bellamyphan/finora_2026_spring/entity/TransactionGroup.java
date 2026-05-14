@@ -16,7 +16,7 @@ public class TransactionGroup {
     @Column(name = "id", nullable = false, length = 10)
     private String id; // NanoID 10-char
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "report_id", foreignKey = @ForeignKey(name = "fk_transaction_groups_report"))
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "report_id", nullable = false, foreignKey = @ForeignKey(name = "fk_transaction_groups_report"))
     private Report report;
 }
