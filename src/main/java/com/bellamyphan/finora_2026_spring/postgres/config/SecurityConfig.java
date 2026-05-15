@@ -56,6 +56,7 @@ public class SecurityConfig {
                                 "/banks/**",
                                 "/locations/**",
                                 "/brands/**",
+                                "/transactions/**",
                                 "/transaction-groups/**",
                                 "/transaction-types/**"
                         )
