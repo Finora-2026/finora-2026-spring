@@ -2,6 +2,7 @@ package com.bellamyphan.finora_2026_spring.postgres.service;
 
 import com.bellamyphan.finora_2026_spring.postgres.dto.TransactionCreateDto;
 import com.bellamyphan.finora_2026_spring.postgres.dto.TransactionGroupCreateDto;
+import com.bellamyphan.finora_2026_spring.postgres.dto.TransactionGroupResponseDto;
 import com.bellamyphan.finora_2026_spring.postgres.entity.*;
 import com.bellamyphan.finora_2026_spring.postgres.repository.TransactionGroupRepository;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +73,19 @@ public class TransactionGroupService {
         }
 
         return group.getId();
+    }
+
+    // ============================================================
+    // LOAD GROUP BY ID
+    // ============================================================
+    @Transactional(readOnly = true)
+    public TransactionGroupResponseDto findTransactionGroupById(String id, User user) {
+        TransactionGroup group = transactionGroupRepository
+                .findByIdAndUserIdWithTransactions(id, user.getId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Transaction group not found with group id " + id + " and user id " + user.getId())
+                );
+        return TransactionGroupResponseDto.fromEntity(group);
     }
 
     private void validateTransactionList(TransactionGroupCreateDto dto) {
