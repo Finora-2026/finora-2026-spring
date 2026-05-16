@@ -3,11 +3,18 @@ package com.bellamyphan.finora_2026_spring.postgres.service;
 import com.bellamyphan.finora_2026_spring.postgres.dto.TransactionCreateDto;
 import com.bellamyphan.finora_2026_spring.postgres.dto.TransactionGroupCreateDto;
 import com.bellamyphan.finora_2026_spring.postgres.dto.TransactionGroupResponseDto;
+import com.bellamyphan.finora_2026_spring.postgres.dto.TransactionResponseDto;
 import com.bellamyphan.finora_2026_spring.postgres.entity.*;
 import com.bellamyphan.finora_2026_spring.postgres.repository.TransactionGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +43,7 @@ public class TransactionGroupService {
         for (TransactionCreateDto row : dto.getTransactions()) {
 
             // Get the account entity
-            Account account = accountService.findAccountById(row.getAccountId());
+            Account account = accountService.findAccountByIdAndUser(row.getAccountId(), user);
 
             // Fetch brand if provided
             Brand brand = null;
@@ -79,13 +86,66 @@ public class TransactionGroupService {
     // LOAD GROUP BY ID
     // ============================================================
     @Transactional(readOnly = true)
-    public TransactionGroupResponseDto findTransactionGroupById(String id, User user) {
+    public TransactionGroupResponseDto findTransactionGroupByIdAndUser(String id, User user) {
         TransactionGroup group = transactionGroupRepository
                 .findByIdAndUserIdWithTransactions(id, user.getId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Transaction group not found with group id " + id + " and user id " + user.getId())
                 );
         return TransactionGroupResponseDto.fromEntity(group);
+    }
+
+    // ============================================================
+    // UPDATE GROUP
+    // ============================================================
+    @Transactional
+    public void updateTransactionGroup(TransactionGroupResponseDto dto, User user) {
+        // Load transaction group and verify ownership
+        TransactionGroup group = transactionGroupRepository
+                .findByIdAndUserIdWithTransactions(dto.getId(), user.getId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Transaction group not found with group id " + dto.getId() + " and user id " + user.getId())
+                );
+
+        // Cannot delete group if linked to report
+        if (group.getReport() != null) {
+            throw new IllegalArgumentException(
+                    "Cannot update transaction group because it has already been included in a report"
+            );
+        }
+
+        // Load transactions from DB
+        List<Transaction> existing = group.getTransactions();
+        Map<String, Transaction> existingMap = existing.stream()
+                .collect(Collectors.toMap(Transaction::getId, t -> t));
+        Set<String> processedIds = new HashSet<>();
+
+        // CREATE + UPDATE
+        for (TransactionResponseDto txDto : dto.getTransactions()) {
+            if (txDto.getId() == null || !existingMap.containsKey(txDto.getId())) {
+                // CREATE NEW TRANSACTION
+                Transaction newTx = new Transaction();
+                newTx.setTransactionGroup(group);
+                transactionService.applyUpdates(newTx, txDto, user);
+                transactionService.createTransactionFromEntity(newTx);
+            } else {
+                // UPDATE EXISTING
+                Transaction existingTx = existingMap.get(txDto.getId());
+                transactionService.updateTransaction(
+                        existingTx.getId(),
+                        txDto,
+                        user
+                );
+                processedIds.add(existingTx.getId());
+            }
+        }
+
+        // DELETE REMOVED TRANSACTIONS
+        for (Transaction tx : existing) {
+            if (!processedIds.contains(tx.getId())) {
+                transactionService.deleteTransaction(tx.getId(), user);
+            }
+        }
     }
 
     private void validateTransactionList(TransactionGroupCreateDto dto) {

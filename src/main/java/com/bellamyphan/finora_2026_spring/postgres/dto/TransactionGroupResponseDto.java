@@ -1,6 +1,7 @@
 package com.bellamyphan.finora_2026_spring.postgres.dto;
 
 import com.bellamyphan.finora_2026_spring.postgres.entity.TransactionGroup;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class TransactionGroupResponseDto {
 
+    @NotBlank(message = "Group id is required")
     private String id;
     private String reportId;
     private boolean isRepeatable;

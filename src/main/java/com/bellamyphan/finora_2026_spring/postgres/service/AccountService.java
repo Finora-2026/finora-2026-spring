@@ -106,14 +106,14 @@ public class AccountService {
         return getAccountResponseDtos(accounts);
     }
 
-    public Account findAccountById(String accountId) {
+    public Account findAccountByIdAndUser(String accountId, User user) {
         if (accountId == null || accountId.isBlank()) {
             throw new IllegalArgumentException("Account ID cannot be null or blank");
         }
 
-        return accountRepository.findById(accountId)
+        return accountRepository.findByIdAndUser_Id(accountId, user.getId())
                 .orElseThrow(() -> new RuntimeException(
-                        "Account not found with this id: " + accountId
+                        "Account not found or does not belong to user for id: " + accountId
                 ));
     }
 

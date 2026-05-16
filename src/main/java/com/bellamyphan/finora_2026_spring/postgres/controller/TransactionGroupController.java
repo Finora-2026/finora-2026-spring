@@ -31,10 +31,40 @@ public class TransactionGroupController {
         ));
     }
 
+    @PutMapping
+    public ResponseEntity<?> updateTransactionGroup(@Valid @RequestBody TransactionGroupResponseDto dto) {
+        // Validate group id
+        if (dto.getId() == null || dto.getId().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Group ID must be provided for update"
+            ));
+        }
+
+        User user = jwtService.getCurrentUser();
+        try {
+            transactionGroupService.updateTransactionGroup(dto, user);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Transaction group updated successfully"
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "success", false,
+                    "message", "Failed to update transaction group: " + e.getMessage()
+            ));
+        }
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TransactionGroupResponseDto> getTransactionGroup(@PathVariable String id) {
         User user = jwtService.getCurrentUser();
-        TransactionGroupResponseDto dto = transactionGroupService.findTransactionGroupById(id, user);
+        TransactionGroupResponseDto dto = transactionGroupService.findTransactionGroupByIdAndUser(id, user);
         return ResponseEntity.ok(dto);
     }
 }
