@@ -67,4 +67,13 @@ public class TransactionGroupController {
         TransactionGroupResponseDto dto = transactionGroupService.findTransactionGroupByIdAndUser(id, user);
         return ResponseEntity.ok(dto);
     }
+
+    @GetMapping("/available-report-groups")
+    public ResponseEntity<?> getAvailableReportGroups() {
+        User user = jwtService.getCurrentUser();
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "data", transactionGroupService.findAvailableReportGroups(user)
+        ));
+    }
 }
