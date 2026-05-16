@@ -36,4 +36,19 @@ public class AccountResponseDto {
                 null  // postedBalance, will be calculated from transactions
         );
     }
+
+    public static AccountResponseDto fromEntity(Account account, BigDecimal pendingBalance, BigDecimal postedBalance) {
+        if (account == null) return null;
+
+        return new AccountResponseDto(
+                account.getId(),
+                account.getName(),
+                account.getBank() != null ? account.getBank().getId() : null,
+                account.getBank() != null ? account.getBank().getName() : null,
+                account.getAccountType() != null ? account.getAccountType().getName() : null,
+                account.getUser() != null ? account.getUser().getEmail() : null,
+                pendingBalance,
+                postedBalance
+        );
+    }
 }

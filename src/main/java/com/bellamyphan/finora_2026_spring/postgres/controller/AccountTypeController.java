@@ -20,7 +20,7 @@ public class AccountTypeController {
 
     @GetMapping
     public ResponseEntity<List<AccountTypeResponseDto>> getAllAccountTypes() {
-        List<AccountTypeResponseDto> types = accountTypeService.getAllAccountTypes();
+        List<AccountTypeResponseDto> types = accountTypeService.findAllAccountTypes();
         return ResponseEntity.status(HttpStatus.OK).body(types);
     }
 }

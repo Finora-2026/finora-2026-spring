@@ -43,7 +43,7 @@ public class TransactionGroupService {
         for (TransactionCreateDto row : dto.getTransactions()) {
 
             // Get the account entity
-            Account account = accountService.findAccountByIdAndUser(row.getAccountId(), user);
+            Account account = accountService.findAccountEntityByIdAndUser(row.getAccountId(), user);
 
             // Fetch brand if provided
             Brand brand = null;

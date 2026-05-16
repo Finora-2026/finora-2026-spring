@@ -20,7 +20,7 @@ public class BankController {
 
     @GetMapping
     public ResponseEntity<List<BankResponseDto>> getAllBanksForCurrentUser() {
-        List<BankResponseDto> banks = bankService.getAllBanks();
+        List<BankResponseDto> banks = bankService.findAllBanks();
         return ResponseEntity.status(HttpStatus.OK).body(banks);
     }
 }
