@@ -107,7 +107,7 @@ public class TransactionGroupService {
                         "Transaction group not found with group id " + dto.getId() + " and user id " + user.getId())
                 );
 
-        // Cannot delete group if linked to report
+        // Cannot delete/update group if linked to report
         if (group.getReport() != null) {
             throw new IllegalArgumentException(
                     "Cannot update transaction group because it has already been included in a report"

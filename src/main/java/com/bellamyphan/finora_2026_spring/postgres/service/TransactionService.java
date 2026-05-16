@@ -62,11 +62,9 @@ public class TransactionService {
                 .orElseThrow(() ->
                         new IllegalArgumentException("Transaction not found")
                 );
-        // Prevent updating posted transactions
+        // Prevent updating posted transactions or just skip
         if (transaction.isPosted()) {
-            throw new IllegalArgumentException(
-                    "Posted transactions cannot be updated for this transaction id: " +  transactionId
-            );
+            return;
         }
         // Update all fields except posted
         applyUpdates(transaction, txDto, user);
