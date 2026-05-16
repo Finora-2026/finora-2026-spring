@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
+
     private final NanoIdService nanoIdService;
     private final AccountService accountService;
     private final BrandService brandService;
@@ -81,7 +83,7 @@ public class TransactionService {
         transaction.setTransactionDate(txDto.getTransactionDate());
         transaction.setAmount(txDto.getAmount());
         transaction.setNotes(txDto.getNotes());
-        transaction.setAccount(accountService.findAccountByIdAndUser(txDto.getAccountId(), user));
+        transaction.setAccount(accountService.findAccountEntityByIdAndUser(txDto.getAccountId(), user));
         if (txDto.getBrandId() != null) {
             transaction.setBrand(
                     brandService.findBrandById(txDto.getBrandId())

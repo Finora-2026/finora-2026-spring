@@ -20,9 +20,15 @@ public class BankService {
         return bankRepository.existsByNameIgnoreCase(name);
     }
 
-    public List<BankResponseDto> getAllBanks() {
+    public List<BankResponseDto> findAllBanks() {
         List<Bank> banks = bankRepository.findAll();
         return banks.stream().map(BankResponseDto::fromEntity).toList();
+    }
+
+    public Bank findBankById(String bankId) {
+        return bankRepository.findById(bankId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Bank not found with this id: " + bankId));
     }
 
     @Transactional

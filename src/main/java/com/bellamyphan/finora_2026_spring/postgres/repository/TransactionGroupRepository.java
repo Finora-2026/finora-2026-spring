@@ -41,4 +41,23 @@ public interface TransactionGroupRepository extends JpaRepository<TransactionGro
     """)
     List<TransactionGroup> findPostedAndUnreportedGroupsByUserId(String userId);
 
+//    @Query("""
+//        SELECT DISTINCT g
+//        FROM TransactionGroup g
+//        LEFT JOIN FETCH g.transactions t
+//        LEFT JOIN FETCH t.account
+//        LEFT JOIN FETCH t.brand
+//        LEFT JOIN FETCH t.location
+//        LEFT JOIN FETCH t.transactionType
+//        WHERE g.user.id = :userId
+//          AND g.report IS NULL
+//          AND NOT EXISTS (
+//              SELECT 1
+//              FROM Transaction t2
+//              WHERE t2.transactionGroup = g
+//              AND t2.isPosted = false
+//          )
+//    """)
+//    List<TransactionGroup> findPostedAndUnreportedGroupsWithFullTransactions(String userId);
+
 }

@@ -50,8 +50,8 @@ public class AccountController {
     @GetMapping("/{id}")
     public ResponseEntity<AccountResponseDto> getAnAccountByIdByUser(@PathVariable String id) {
         User user = jwtService.getCurrentUser();
-        Account account = accountService.findAccountByIdAndUser(id, user);
-        return ResponseEntity.ok(AccountResponseDto.fromEntity(account));
+        AccountResponseDto accountDto = accountService.findAccountDtoByIdAndUser(id, user);
+        return ResponseEntity.ok(accountDto);
     }
 
     // -----------------------

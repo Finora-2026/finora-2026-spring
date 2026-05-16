@@ -21,9 +21,15 @@ public class AccountTypeService {
         return accountTypeRepository.findByName(type).isPresent();
     }
 
-    public List<AccountTypeResponseDto> getAllAccountTypes() {
+    public List<AccountTypeResponseDto> findAllAccountTypes() {
         List<AccountType> types = accountTypeRepository.findAll();
         return types.stream().map(AccountTypeResponseDto::fromEntity).toList();
+    }
+
+    public AccountType findAccountTypeById(String id) {
+        return accountTypeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException(
+                        "Account type not found for this typeId: " + id));
     }
 
     @Transactional

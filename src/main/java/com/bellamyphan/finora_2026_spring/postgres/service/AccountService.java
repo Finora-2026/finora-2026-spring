@@ -7,8 +7,7 @@ import com.bellamyphan.finora_2026_spring.postgres.entity.AccountType;
 import com.bellamyphan.finora_2026_spring.postgres.entity.Bank;
 import com.bellamyphan.finora_2026_spring.postgres.entity.User;
 import com.bellamyphan.finora_2026_spring.postgres.repository.AccountRepository;
-import com.bellamyphan.finora_2026_spring.postgres.repository.AccountTypeRepository;
-import com.bellamyphan.finora_2026_spring.postgres.repository.BankRepository;
+import com.bellamyphan.finora_2026_spring.postgres.repository.TransactionRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -26,24 +25,19 @@ import java.util.stream.Collectors;
 public class AccountService {
 
     private final NanoIdService nanoIdService;
+    private final BankService bankService;
+    private final AccountTypeService accountTypeService;
 
     private final AccountRepository accountRepository;
-    private final AccountTypeRepository accountTypeRepository;
-    private final BankRepository bankRepository;
+    private final TransactionRepository transactionRepository;
 
     /**
      * Save a new account with unique 10-char ID
      */
     @Transactional
     public Account createAccount(@Valid AccountEditDto accountEditDto, User user) {
-
-        Bank bank = bankRepository.findById(accountEditDto.getBankId())
-                .orElseThrow(() -> new RuntimeException(
-                        "Bank group not found: " + accountEditDto.getBankId()));
-
-        AccountType type = accountTypeRepository.findById(accountEditDto.getTypeId())
-                .orElseThrow(() -> new RuntimeException(
-                        "Account type not found for this typeId: " + accountEditDto.getTypeId()));
+        Bank bank = bankService.findBankById(accountEditDto.getBankId());
+        AccountType type = accountTypeService.findAccountTypeById(accountEditDto.getTypeId());
 
         Account account = new Account(
                 accountEditDto.getName(),
@@ -54,10 +48,9 @@ public class AccountService {
                 user
         );
 
-        String accountId = nanoIdService.generateUniqueId(bankRepository);
+        String accountId = nanoIdService.generateUniqueId(accountRepository);
         account.setId(accountId);
         accountRepository.save(account);
-
         return account;
     }
 
@@ -71,7 +64,7 @@ public class AccountService {
         List<Account> accounts = accountRepository.findByUser(user).stream()
                 .sorted((b1, b2) -> b1.getBank().getName().compareToIgnoreCase(b2.getBank().getName()))
                 .toList();
-        return getAccountResponseDtos(accounts);
+        return getAccountResponseDtos(accounts, user);
     }
 
     /**
@@ -87,7 +80,7 @@ public class AccountService {
                 .sorted((b1, b2) -> b1.getBank().getName().compareToIgnoreCase(b2.getBank().getName()))
                 .toList();
 
-        return getAccountResponseDtos(accounts);
+        return getAccountResponseDtos(accounts, user);
     }
 
     /**
@@ -103,10 +96,10 @@ public class AccountService {
                 .sorted((b1, b2) -> b1.getBank().getName().compareToIgnoreCase(b2.getBank().getName()))
                 .toList();
 
-        return getAccountResponseDtos(accounts);
+        return getAccountResponseDtos(accounts, user);
     }
 
-    public Account findAccountByIdAndUser(String accountId, User user) {
+    public Account findAccountEntityByIdAndUser(String accountId, User user) {
         if (accountId == null || accountId.isBlank()) {
             throw new IllegalArgumentException("Account ID cannot be null or blank");
         }
@@ -117,15 +110,21 @@ public class AccountService {
                 ));
     }
 
+    public AccountResponseDto findAccountDtoByIdAndUser(String accountId, User user) {
+        Account account = findAccountEntityByIdAndUser(accountId, user);
+        BigDecimal pendingBalance = transactionRepository.calculatePendingBalance(account.getId(), user.getId());
+        BigDecimal postedBalance = transactionRepository.calculatePostedBalance(account.getId(), user.getId());
+        return AccountResponseDto.fromEntity(account, pendingBalance, postedBalance);
+    }
+
     @NonNull
-    private List<AccountResponseDto> getAccountResponseDtos(List<Account> accounts) {
+    private List<AccountResponseDto> getAccountResponseDtos(List<Account> accounts, User user) {
         return accounts.stream()
                 .map(account -> {
-                    // Todo: Calculate this amount later
-//                    BigDecimal pendingBalance = calculatePendingBalance(account.getId());
-//                    BigDecimal postedBalance = calculatePostedBalance(account.getId());
-                    BigDecimal pendingBalance = new BigDecimal("0");
-                    BigDecimal postedBalance = new BigDecimal("0");
+                    BigDecimal pendingBalance = transactionRepository
+                            .calculatePendingBalance(account.getId(), user.getId());
+                    BigDecimal postedBalance = transactionRepository
+                            .calculatePostedBalance(account.getId(), user.getId());
                     return new AccountResponseDto(
                             account.getId(),
                             account.getName(),
