@@ -120,6 +120,15 @@ public class TransactionGroupService {
                 .collect(Collectors.toMap(Transaction::getId, t -> t));
         Set<String> processedIds = new HashSet<>();
 
+        // If groupGto has no transactions, then delete this group and all transaction belong to this group.
+        if (dto.getTransactions() == null || dto.getTransactions().isEmpty()) {
+            for (Transaction tx : existing) {
+                transactionService.deleteTransaction(tx.getId(), user);
+            }
+            transactionGroupRepository.delete(group);
+            return;
+        }
+
         // CREATE + UPDATE
         for (TransactionResponseDto txDto : dto.getTransactions()) {
             if (txDto.getId() == null || !existingMap.containsKey(txDto.getId())) {
