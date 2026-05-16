@@ -95,6 +95,15 @@ public class TransactionGroupService {
         return TransactionGroupResponseDto.fromEntity(group);
     }
 
+    @Transactional(readOnly = true)
+    public List<TransactionGroupResponseDto> findAvailableReportGroups(User user) {
+        List<TransactionGroup> groups =
+                transactionGroupRepository.findPostedAndUnreportedGroupsByUserId(user.getId());
+        return groups.stream()
+                .map(TransactionGroupResponseDto::fromEntity)
+                .toList();
+    }
+
     // ============================================================
     // UPDATE GROUP
     // ============================================================
