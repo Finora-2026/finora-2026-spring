@@ -45,6 +45,16 @@ public class AccountController {
     }
 
     // -----------------------
+    // GET an account by id and user token
+    // -----------------------
+    @GetMapping("/{id}")
+    public ResponseEntity<AccountResponseDto> getAnAccountByIdByUser(@PathVariable String id) {
+        User user = jwtService.getCurrentUser();
+        Account account = accountService.findAccountByIdAndUser(id, user);
+        return ResponseEntity.ok(AccountResponseDto.fromEntity(account));
+    }
+
+    // -----------------------
     // GET all accounts by user token
     // -----------------------
     @GetMapping
