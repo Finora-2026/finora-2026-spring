@@ -1,13 +1,7 @@
 package com.bellamyphan.finora_2026_spring.postgres.service;
 
-import com.bellamyphan.finora_2026_spring.postgres.dto.AccountBalanceRequestDto;
-import com.bellamyphan.finora_2026_spring.postgres.dto.AccountBalanceResponseDto;
-import com.bellamyphan.finora_2026_spring.postgres.dto.AccountEditDto;
-import com.bellamyphan.finora_2026_spring.postgres.dto.AccountResponseDto;
-import com.bellamyphan.finora_2026_spring.postgres.entity.Account;
-import com.bellamyphan.finora_2026_spring.postgres.entity.AccountType;
-import com.bellamyphan.finora_2026_spring.postgres.entity.Bank;
-import com.bellamyphan.finora_2026_spring.postgres.entity.User;
+import com.bellamyphan.finora_2026_spring.postgres.dto.*;
+import com.bellamyphan.finora_2026_spring.postgres.entity.*;
 import com.bellamyphan.finora_2026_spring.postgres.repository.AccountRepository;
 import com.bellamyphan.finora_2026_spring.postgres.repository.TransactionRepository;
 import jakarta.validation.Valid;
@@ -18,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -130,6 +126,77 @@ public class AccountService {
                 .calculatePostedBalanceAsOfDate(account.getId(), user.getId(), requestDto.getAsOfDate());
 
         return AccountBalanceResponseDto.fromRequestDto(requestDto, pendingBalance, postedBalance);
+    }
+
+    public List<AccountDailyBalanceDto> calculateLastNDaysBalances(String accountId, User user, int days) {
+        // Days must be valid, natural number, non-zero
+        if (days <= 0) {
+            throw new IllegalArgumentException("Days must be positive number");
+        }
+
+        // Check ownership
+        findAccountEntityByIdAndUser(accountId, user);
+
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = today.minusDays(days - 1);
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = today.atTime(23, 59, 59);
+
+
+        // Get balances before startDate
+        AccountBalanceRequestDto startingRequestDto = new AccountBalanceRequestDto();
+        startingRequestDto.setAccountId(accountId);
+        startingRequestDto.setAsOfDate(startDateTime.minusDays(1));
+        AccountBalanceResponseDto startingBalances =
+                findAccountBalanceAsOfDate(startingRequestDto, user);
+        BigDecimal runningPosted = startingBalances.getPostedBalance();
+        BigDecimal runningPending = startingBalances.getPendingBalance();
+
+        // Load all transaction belong to this account and between the dates range
+        List<Transaction> transactions =
+                transactionRepository.findByAccountIdAndTransactionDateBetweenOrderByTransactionDateAsc(
+                        accountId,
+                        startDateTime,
+                        endDateTime
+                );
+
+        // Group by DATE (not datetime)
+        Map<LocalDate, List<Transaction>> groupedByDate = transactions.stream()
+                .collect(Collectors.groupingBy(
+                        t -> t.getTransactionDate().toLocalDate(),
+                        TreeMap::new,
+                        Collectors.toList()
+                ));
+        List<AccountDailyBalanceDto> result = new ArrayList<>();
+
+        // Build rolling balances
+        for (int i = 0; i < days; i++) {
+            LocalDate date = startDate.plusDays(i);
+            List<Transaction> dailyTransactions =
+                    groupedByDate.getOrDefault(date, List.of());
+
+            BigDecimal postedSum = dailyTransactions.stream()
+                    .filter(Transaction::isPosted)
+                    .map(Transaction::getAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            BigDecimal allSum = dailyTransactions.stream()
+                    .map(Transaction::getAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            runningPosted = runningPosted.add(postedSum);
+            runningPending = runningPending.add(allSum);
+
+            result.add(new AccountDailyBalanceDto(
+                    date,
+                    runningPending,
+                    runningPosted
+            ));
+        }
+
+        // Newest first, reverse the list then return
+        Collections.reverse(result);
+        return result;
     }
 
     @NonNull

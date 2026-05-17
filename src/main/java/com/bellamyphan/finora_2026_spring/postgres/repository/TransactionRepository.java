@@ -18,6 +18,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 
     Optional<Transaction> findByIdAndAccount_User_Id(String id, String userId);
 
+    List<Transaction> findByAccountIdAndTransactionDateBetweenOrderByTransactionDateAsc(
+            String accountId, LocalDateTime start, LocalDateTime end);
+
     @Query("""
         SELECT COALESCE(SUM(t.amount), 0)
         FROM Transaction t
