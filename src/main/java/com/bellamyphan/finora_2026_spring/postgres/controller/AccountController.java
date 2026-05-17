@@ -25,22 +25,19 @@ public class AccountController {
     // POST create a new account
     // -----------------------
     @PostMapping
-    public ResponseEntity<AccountResponseDto> createAccount(@RequestBody @Valid AccountEditDto accountEditDto) {
-
+    public ResponseEntity<AccountEditDto> createAccount(@RequestBody @Valid AccountEditDto accountEditDto) {
         // Create, not update
         if (accountEditDto.getId() != null) {
             throw new IllegalArgumentException("New account must not contain id");
         }
-
         // Create, not closing account
         if (accountEditDto.getClosingDate() != null) {
             throw new IllegalArgumentException("New account cannot have closing date");
         }
 
         User user = jwtService.getCurrentUser();
-        Account savedAccount = accountService.createAccount(accountEditDto, user);
-
-        return new ResponseEntity<>(AccountResponseDto.fromEntity(savedAccount), HttpStatus.CREATED);
+        AccountEditDto savedAccountDto = accountService.createAccount(accountEditDto, user);
+        return new ResponseEntity<>(savedAccountDto, HttpStatus.CREATED);
     }
 
     @GetMapping("/check-name")
@@ -59,6 +56,16 @@ public class AccountController {
     public ResponseEntity<AccountResponseDto> getAnAccountByIdByUser(@PathVariable String id) {
         User user = jwtService.getCurrentUser();
         AccountResponseDto accountDto = accountService.findAccountDtoByIdAndUser(id, user);
+        return ResponseEntity.ok(accountDto);
+    }
+
+    // -----------------------
+    // GET an account by id and user token, return edit dto to fetch FE
+    // -----------------------
+    @GetMapping("/edit/{id}")
+    public ResponseEntity<AccountEditDto> getAnAccountByIdByUserForEdit(@PathVariable String id) {
+        User user = jwtService.getCurrentUser();
+        AccountEditDto accountDto = accountService.findAccountEditDtoByIdAndUser(id, user);
         return ResponseEntity.ok(accountDto);
     }
 
