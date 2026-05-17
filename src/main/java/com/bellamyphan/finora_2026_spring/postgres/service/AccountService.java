@@ -1,5 +1,7 @@
 package com.bellamyphan.finora_2026_spring.postgres.service;
 
+import com.bellamyphan.finora_2026_spring.postgres.dto.AccountBalanceRequestDto;
+import com.bellamyphan.finora_2026_spring.postgres.dto.AccountBalanceResponseDto;
 import com.bellamyphan.finora_2026_spring.postgres.dto.AccountEditDto;
 import com.bellamyphan.finora_2026_spring.postgres.dto.AccountResponseDto;
 import com.bellamyphan.finora_2026_spring.postgres.entity.Account;
@@ -115,6 +117,19 @@ public class AccountService {
         BigDecimal pendingBalance = transactionRepository.calculatePendingBalance(account.getId(), user.getId());
         BigDecimal postedBalance = transactionRepository.calculatePostedBalance(account.getId(), user.getId());
         return AccountResponseDto.fromEntity(account, pendingBalance, postedBalance);
+    }
+
+    public AccountBalanceResponseDto findAccountBalanceAsOfDate(AccountBalanceRequestDto requestDto, User user) {
+        // Verify ownership
+        Account account = findAccountEntityByIdAndUser(requestDto.getAccountId(), user);
+
+        BigDecimal pendingBalance = transactionRepository
+                .calculatePendingBalanceAsOfDate(account.getId(), user.getId(), requestDto.getAsOfDate());
+
+        BigDecimal postedBalance = transactionRepository
+                .calculatePostedBalanceAsOfDate(account.getId(), user.getId(), requestDto.getAsOfDate());
+
+        return AccountBalanceResponseDto.fromRequestDto(requestDto, pendingBalance, postedBalance);
     }
 
     @NonNull
