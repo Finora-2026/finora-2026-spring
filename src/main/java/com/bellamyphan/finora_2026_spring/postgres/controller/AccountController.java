@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -68,8 +68,8 @@ public class AccountController {
             @RequestParam String dateTime
     ) {
         User user = jwtService.getCurrentUser();
-        LocalDateTime parsedDateTime = LocalDateTime.parse(dateTime);
-        boolean valid = accountService.softCheckValidDate(parsedDateTime, id, user);
+        LocalDate date = LocalDate.parse(dateTime);
+        boolean valid = accountService.softCheckValidDate(date, id, user);
         return ResponseEntity.ok(new AccountDateValidationResponseDto(valid));
     }
 
