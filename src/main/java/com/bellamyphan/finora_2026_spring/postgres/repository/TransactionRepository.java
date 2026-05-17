@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,10 +34,37 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
         FROM Transaction t
         WHERE t.account.id = :accountId
             AND t.account.user.id = :userId
+            AND t.transactionDate <= :asOfDate
+    """)
+    BigDecimal calculatePendingBalanceAsOfDate(
+            @Param("accountId") String accountId,
+            @Param("userId") String userId,
+            @Param("asOfDate") LocalDateTime asOfDate
+    );
+
+    @Query("""
+        SELECT COALESCE(SUM(t.amount), 0)
+        FROM Transaction t
+        WHERE t.account.id = :accountId
+            AND t.account.user.id = :userId
             AND t.isPosted = true
     """)
     BigDecimal calculatePostedBalance(
             @Param("accountId") String accountId,
             @Param("userId") String userId
+    );
+
+    @Query("""
+        SELECT COALESCE(SUM(t.amount), 0)
+        FROM Transaction t
+        WHERE t.account.id = :accountId
+            AND t.account.user.id = :userId
+            AND t.isPosted = true
+            AND t.transactionDate <= :asOfDate
+    """)
+    BigDecimal calculatePostedBalanceAsOfDate(
+            @Param("accountId") String accountId,
+            @Param("userId") String userId,
+            @Param("asOfDate") LocalDateTime asOfDate
     );
 }

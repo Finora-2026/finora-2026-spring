@@ -1,5 +1,7 @@
 package com.bellamyphan.finora_2026_spring.postgres.controller;
 
+import com.bellamyphan.finora_2026_spring.postgres.dto.AccountBalanceRequestDto;
+import com.bellamyphan.finora_2026_spring.postgres.dto.AccountBalanceResponseDto;
 import com.bellamyphan.finora_2026_spring.postgres.dto.AccountEditDto;
 import com.bellamyphan.finora_2026_spring.postgres.dto.AccountResponseDto;
 import com.bellamyphan.finora_2026_spring.postgres.entity.Account;
@@ -52,6 +54,16 @@ public class AccountController {
         User user = jwtService.getCurrentUser();
         AccountResponseDto accountDto = accountService.findAccountDtoByIdAndUser(id, user);
         return ResponseEntity.ok(accountDto);
+    }
+
+    // -----------------------
+    // GET account balances based on input date
+    // -----------------------
+    @PostMapping("/balance-as-of-date")
+    public ResponseEntity<AccountBalanceResponseDto> getAccountBalanceAsOfDate(
+            @Valid @RequestBody AccountBalanceRequestDto accountBalanceRequestDto) {
+        User user = jwtService.getCurrentUser();
+        return ResponseEntity.ok(accountService.findAccountBalanceAsOfDate(accountBalanceRequestDto, user));
     }
 
     // -----------------------
