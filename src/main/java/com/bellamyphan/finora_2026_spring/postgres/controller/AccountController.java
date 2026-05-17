@@ -67,10 +67,14 @@ public class AccountController {
     // GET last 30 days of daily balances
     // -----------------------
     @GetMapping("/{id}/daily-balance")
-    public ResponseEntity<List<AccountDailyBalanceDto>> getDailyBalance(@PathVariable String id) {
+    public ResponseEntity<List<AccountDailyBalanceDto>> getDailyBalance(
+            @PathVariable String id,
+            @RequestParam(defaultValue = "30") int days
+    ) {
         User user = jwtService.getCurrentUser();
-        List<AccountDailyBalanceDto> balances = accountService.calculateLastNDaysBalances(id, user, 30);
-        return ResponseEntity.ok(balances);
+        return ResponseEntity.ok(
+                accountService.calculateLastNDaysBalances(id, user, days)
+        );
     }
 
     // -----------------------
