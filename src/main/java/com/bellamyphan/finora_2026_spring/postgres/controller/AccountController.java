@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -59,6 +60,17 @@ public class AccountController {
         User user = jwtService.getCurrentUser();
         boolean exists = accountService.accountNameExists(name, user);
         return ResponseEntity.ok(!exists);
+    }
+
+    @GetMapping("/{id}/validate-date")
+    public ResponseEntity<AccountDateValidationResponseDto> validateAccountDate(
+            @PathVariable String id,
+            @RequestParam String dateTime
+    ) {
+        User user = jwtService.getCurrentUser();
+        LocalDateTime parsedDateTime = LocalDateTime.parse(dateTime);
+        boolean valid = accountService.softCheckValidDate(parsedDateTime, id, user);
+        return ResponseEntity.ok(new AccountDateValidationResponseDto(valid));
     }
 
     // -----------------------
