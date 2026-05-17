@@ -34,7 +34,7 @@ public class AccountService {
      * Save a new account with unique 10-char ID
      */
     @Transactional
-    public Account createAccount(@Valid AccountEditDto accountEditDto, User user) {
+    public AccountEditDto createAccount(@Valid AccountEditDto accountEditDto, User user) {
         try {
 
             if (accountRepository.existsByUser_IdAndNameIgnoreCase(
@@ -60,8 +60,8 @@ public class AccountService {
 
             String accountId = nanoIdService.generateUniqueId(accountRepository);
             account.setId(accountId);
-
-            return accountRepository.save(account);
+            Account savedAccount = accountRepository.save(account);
+            return AccountEditDto.fromEntity(savedAccount);
 
         } catch (DataIntegrityViolationException ex) {
             throw new IllegalArgumentException(
@@ -135,6 +135,11 @@ public class AccountService {
                 .orElseThrow(() -> new RuntimeException(
                         "Account not found or does not belong to user for id: " + accountId
                 ));
+    }
+
+    public AccountEditDto findAccountEditDtoByIdAndUser(String accountId, User user) {
+        Account account = findAccountEntityByIdAndUser(accountId, user);
+        return AccountEditDto.fromEntity(account);
     }
 
     public AccountResponseDto findAccountDtoByIdAndUser(String accountId, User user) {
