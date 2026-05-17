@@ -248,6 +248,8 @@ public class AccountService {
                             account.getBank().getName(),
                             account.getAccountType().getName(),
                             account.getUser().getEmail(),
+                            account.getOpeningDate(),
+                            account.getClosingDate(),
                             pendingBalance,
                             postedBalance
                     );
