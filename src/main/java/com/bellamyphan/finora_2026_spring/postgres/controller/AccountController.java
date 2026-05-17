@@ -25,11 +25,9 @@ public class AccountController {
     // -----------------------
     @PostMapping
     public ResponseEntity<AccountEditDto> createAccount(@RequestBody @Valid AccountEditDto accountEditDto) {
-        // Create, not update
         if (accountEditDto.getId() != null) {
             throw new IllegalArgumentException("New account must not contain id");
         }
-        // Create, not closing account
         if (accountEditDto.getClosingDate() != null) {
             throw new IllegalArgumentException("New account cannot have closing date");
         }
@@ -37,6 +35,21 @@ public class AccountController {
         User user = jwtService.getCurrentUser();
         AccountEditDto savedAccountDto = accountService.createAccount(accountEditDto, user);
         return new ResponseEntity<>(savedAccountDto, HttpStatus.CREATED);
+    }
+
+
+    // -----------------------
+    // PUT update existing account
+    // -----------------------
+    @PutMapping
+    public ResponseEntity<AccountEditDto> updateAccount(@RequestBody @Valid AccountEditDto accountEditDto) {
+        if (accountEditDto.getId() == null) {
+            throw new IllegalArgumentException("Existing account must have an id");
+        }
+
+        User user = jwtService.getCurrentUser();
+        AccountEditDto savedAccountDto = accountService.updateAccount(accountEditDto, user);
+        return new ResponseEntity<>(savedAccountDto, HttpStatus.OK);
     }
 
     @GetMapping("/check-name")
