@@ -63,6 +63,13 @@ public class TransactionGroupService {
                 transactionType = transactionTypeService.findTransactionTypeById(row.getTransactionTypeId());
             }
 
+            // Transaction date must be inside account active period
+            accountService.validateTransactionDateForAccount(
+                    row.getTransactionDate().toLocalDate(),
+                    row.getAccountId(),
+                    user
+            );
+
             // Create a transaction entity
             Transaction tx = new Transaction();
             // Id will be handled in the transactionService

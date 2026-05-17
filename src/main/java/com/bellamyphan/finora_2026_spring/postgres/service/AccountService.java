@@ -148,6 +148,18 @@ public class AccountService {
         return closing == null || !date.isAfter(closing);
     }
 
+    public void validateTransactionDateForAccount(
+            LocalDate date,
+            String accountId,
+            User user
+    ) {
+        if (!softCheckValidDate(date, accountId, user)) {
+            throw new IllegalArgumentException(
+                    "Transaction date is outside the account active period"
+            );
+        }
+    }
+
     /**
      * Find all accounts belonging to a given user
      */

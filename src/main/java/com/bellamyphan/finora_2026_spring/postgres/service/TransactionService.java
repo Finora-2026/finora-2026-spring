@@ -79,6 +79,22 @@ public class TransactionService {
 
     // Update all fields except posted
     public void applyUpdates(Transaction transaction, TransactionResponseDto txDto, User user) {
+        // Validate required fields first
+        if (txDto.getTransactionDate() == null) {
+            throw new IllegalArgumentException("Transaction date is required");
+        }
+
+        if (txDto.getAccountId() == null || txDto.getAccountId().isBlank()) {
+            throw new IllegalArgumentException("Account is required");
+        }
+
+        // Transaction date must be inside account active period
+        accountService.validateTransactionDateForAccount(
+                txDto.getTransactionDate().toLocalDate(),
+                txDto.getAccountId(),
+                user
+        );
+
         transaction.setTransactionDate(txDto.getTransactionDate());
         transaction.setAmount(txDto.getAmount());
         transaction.setNotes(txDto.getNotes());
