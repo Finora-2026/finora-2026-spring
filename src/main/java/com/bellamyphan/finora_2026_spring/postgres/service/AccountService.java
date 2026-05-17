@@ -7,6 +7,7 @@ import com.bellamyphan.finora_2026_spring.postgres.repository.TransactionReposit
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -34,22 +35,39 @@ public class AccountService {
      */
     @Transactional
     public Account createAccount(@Valid AccountEditDto accountEditDto, User user) {
-        Bank bank = bankService.findBankById(accountEditDto.getBankId());
-        AccountType type = accountTypeService.findAccountTypeById(accountEditDto.getTypeId());
+        try {
 
-        Account account = new Account(
-                accountEditDto.getName(),
-                accountEditDto.getOpeningDate(),
-                accountEditDto.getClosingDate(),
-                bank,
-                type,
-                user
-        );
+            if (accountRepository.existsByUser_IdAndNameIgnoreCase(
+                    user.getId(),
+                    accountEditDto.getName()
+            )) {
+                throw new IllegalArgumentException(
+                        "Account name already exists for this user"
+                );
+            }
 
-        String accountId = nanoIdService.generateUniqueId(accountRepository);
-        account.setId(accountId);
-        accountRepository.save(account);
-        return account;
+            Bank bank = bankService.findBankById(accountEditDto.getBankId());
+            AccountType type = accountTypeService.findAccountTypeById(accountEditDto.getTypeId());
+
+            Account account = new Account(
+                    accountEditDto.getName(),
+                    accountEditDto.getOpeningDate(),
+                    accountEditDto.getClosingDate(),
+                    bank,
+                    type,
+                    user
+            );
+
+            String accountId = nanoIdService.generateUniqueId(accountRepository);
+            account.setId(accountId);
+
+            return accountRepository.save(account);
+
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalArgumentException(
+                    "Account name already exists for this user"
+            );
+        }
     }
 
     /**
