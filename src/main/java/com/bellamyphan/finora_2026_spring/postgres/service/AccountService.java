@@ -36,7 +36,6 @@ public class AccountService {
     @Transactional
     public AccountEditDto createAccount(@Valid AccountEditDto accountEditDto, User user) {
         try {
-
             if (accountRepository.existsByUser_IdAndNameIgnoreCase(
                     user.getId(),
                     accountEditDto.getName()
@@ -68,6 +67,46 @@ public class AccountService {
                     "Account name already exists for this user"
             );
         }
+    }
+
+    @Transactional
+    public AccountEditDto updateAccount(@Valid AccountEditDto dto, User user) {
+        // Existing account must have an id
+        if (dto.getId() == null || dto.getId().isBlank()) {
+            throw new IllegalArgumentException("Account ID is required for update");
+        }
+        Account account = findAccountEntityByIdAndUser(dto.getId(), user);
+
+        // ---- BLOCK CLOSED ACCOUNTS ----
+        if (account.getClosingDate() != null) {
+            throw new IllegalStateException("Closed accounts cannot be modified");
+        }
+
+        // Prevent duplicate name (exclude current account)
+        boolean nameExists = accountRepository.existsByUser_IdAndNameIgnoreCase(
+                user.getId(),
+                dto.getName()
+        );
+        if (nameExists && !account.getName().equalsIgnoreCase(dto.getName())) {
+            throw new IllegalArgumentException(
+                    "Account name already exists for this user"
+            );
+        }
+
+        Bank bank = bankService.findBankById(dto.getBankId());
+
+        // Apply updates, only allow fields
+        account.setName(dto.getName());
+        account.setBank(bank);
+
+        // ---- Closing logic (one-time only) ----
+        if (dto.getClosingDate() != null && account.getClosingDate() == null) {
+            account.setClosingDate(dto.getClosingDate());
+        }
+
+        Account saved = accountRepository.save(account);
+
+        return AccountEditDto.fromEntity(saved);
     }
 
     public boolean accountNameExists(String name, User user) {
