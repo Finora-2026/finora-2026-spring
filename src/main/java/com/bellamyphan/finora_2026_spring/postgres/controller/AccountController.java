@@ -1,9 +1,6 @@
 package com.bellamyphan.finora_2026_spring.postgres.controller;
 
-import com.bellamyphan.finora_2026_spring.postgres.dto.AccountBalanceRequestDto;
-import com.bellamyphan.finora_2026_spring.postgres.dto.AccountBalanceResponseDto;
-import com.bellamyphan.finora_2026_spring.postgres.dto.AccountEditDto;
-import com.bellamyphan.finora_2026_spring.postgres.dto.AccountResponseDto;
+import com.bellamyphan.finora_2026_spring.postgres.dto.*;
 import com.bellamyphan.finora_2026_spring.postgres.entity.Account;
 import com.bellamyphan.finora_2026_spring.postgres.entity.User;
 import com.bellamyphan.finora_2026_spring.postgres.service.AccountService;
@@ -64,6 +61,16 @@ public class AccountController {
             @Valid @RequestBody AccountBalanceRequestDto accountBalanceRequestDto) {
         User user = jwtService.getCurrentUser();
         return ResponseEntity.ok(accountService.findAccountBalanceAsOfDate(accountBalanceRequestDto, user));
+    }
+
+    // -----------------------
+    // GET last 30 days of daily balances
+    // -----------------------
+    @GetMapping("/{id}/daily-balance")
+    public ResponseEntity<List<AccountDailyBalanceDto>> getDailyBalance(@PathVariable String id) {
+        User user = jwtService.getCurrentUser();
+        List<AccountDailyBalanceDto> balances = accountService.calculateLastNDaysBalances(id, user, 30);
+        return ResponseEntity.ok(balances);
     }
 
     // -----------------------
