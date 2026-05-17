@@ -120,27 +120,32 @@ public class AccountService {
         );
     }
 
-    public boolean softCheckValidDate(LocalDateTime dateTime, String accountId, User user) {
-        if (dateTime == null) {
+    public boolean softCheckValidDate(LocalDate date, String accountId, User user) {
+        if (date == null) {
             throw new IllegalArgumentException("Date cannot be null");
         }
         if (accountId == null || accountId.isBlank()) {
             throw new IllegalArgumentException("Account ID cannot be null or blank");
         }
 
-        // Verified ownership and get account
+        // Verify ownership and get account
         Account account = findAccountEntityByIdAndUser(accountId, user);
 
-        LocalDateTime opening = account.getOpeningDate();
-        LocalDateTime closing = account.getClosingDate();
+        LocalDate opening = account.getOpeningDate() != null
+                ? account.getOpeningDate().toLocalDate()
+                : null;
+
+        LocalDate closing = account.getClosingDate() != null
+                ? account.getClosingDate().toLocalDate()
+                : null;
 
         // must be after or equal opening date
-        if (opening != null && dateTime.isBefore(opening)) {
+        if (opening != null && date.isBefore(opening)) {
             return false;
         }
 
         // must be before or equal closing date (if exists)
-        return closing == null || !dateTime.isAfter(closing);
+        return closing == null || !date.isAfter(closing);
     }
 
     /**
