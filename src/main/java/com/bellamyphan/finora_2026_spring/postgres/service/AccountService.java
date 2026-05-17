@@ -70,6 +70,17 @@ public class AccountService {
         }
     }
 
+    public boolean accountNameExists(String name, User user) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Account name cannot be blank");
+        }
+
+        return accountRepository.existsByUser_IdAndNameIgnoreCase(
+                user.getId(),
+                name.trim()
+        );
+    }
+
     /**
      * Find all accounts belonging to a given user
      */
