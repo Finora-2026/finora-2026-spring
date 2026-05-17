@@ -43,6 +43,15 @@ public class AccountController {
         return new ResponseEntity<>(AccountResponseDto.fromEntity(savedAccount), HttpStatus.CREATED);
     }
 
+    @GetMapping("/check-name")
+    public ResponseEntity<Boolean> checkAccountNameAvailability(
+            @RequestParam String name
+    ) {
+        User user = jwtService.getCurrentUser();
+        boolean exists = accountService.accountNameExists(name, user);
+        return ResponseEntity.ok(!exists);
+    }
+
     // -----------------------
     // GET an account by id and user token
     // -----------------------
