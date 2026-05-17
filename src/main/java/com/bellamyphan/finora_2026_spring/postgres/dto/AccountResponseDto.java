@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -19,6 +20,8 @@ public class AccountResponseDto {
     private String bankName;
     private AccountTypeEnum type;
     private String email;
+    private LocalDateTime openingDate;
+    private LocalDateTime closingDate;
     private BigDecimal pendingBalance;
     private BigDecimal postedBalance;
 
@@ -32,6 +35,8 @@ public class AccountResponseDto {
                 account.getBank() != null ? account.getBank().getName() : null,
                 account.getAccountType() != null ? account.getAccountType().getName() : null,
                 account.getUser() != null ? account.getUser().getEmail() : null,
+                account.getOpeningDate(),
+                account.getClosingDate(),
                 null, // pendingBalance, will be calculated from transactions
                 null  // postedBalance, will be calculated from transactions
         );
@@ -47,6 +52,8 @@ public class AccountResponseDto {
                 account.getBank() != null ? account.getBank().getName() : null,
                 account.getAccountType() != null ? account.getAccountType().getName() : null,
                 account.getUser() != null ? account.getUser().getEmail() : null,
+                account.getOpeningDate(),
+                account.getClosingDate(),
                 pendingBalance,
                 postedBalance
         );
