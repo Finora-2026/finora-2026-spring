@@ -1,7 +1,6 @@
 package com.bellamyphan.finora_2026_spring.postgres.controller;
 
 import com.bellamyphan.finora_2026_spring.postgres.dto.*;
-import com.bellamyphan.finora_2026_spring.postgres.entity.Account;
 import com.bellamyphan.finora_2026_spring.postgres.entity.User;
 import com.bellamyphan.finora_2026_spring.postgres.service.AccountService;
 import com.bellamyphan.finora_2026_spring.postgres.service.JwtService;
