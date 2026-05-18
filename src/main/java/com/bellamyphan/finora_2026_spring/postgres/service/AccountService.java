@@ -99,8 +99,18 @@ public class AccountService {
         account.setName(dto.getName());
         account.setBank(bank);
 
-        // ---- Closing logic (one-time only) ----
+        // ---- ENFORCED CLOSING LOGIC ----
         if (dto.getClosingDate() != null && account.getClosingDate() == null) {
+            boolean canClose = softCheckCanCloseAccount(
+                    account.getId(),
+                    user,
+                    dto.getClosingDate().toLocalDate()
+            );
+            if (!canClose) {
+                throw new IllegalStateException(
+                        "Account cannot be closed due to invalid transactions or date constraints"
+                );
+            }
             account.setClosingDate(dto.getClosingDate());
         }
 
@@ -175,7 +185,7 @@ public class AccountService {
 
         // Rule 2: all transactions must be within opening → closing range (proposed)
         List<Transaction> transactions =
-                transactionRepository.findByAccount_Id(account.getUser().getId());
+                transactionRepository.findByAccount_IdAndAccount_User_Id(account.getId(), user.getId());
         for (Transaction t : transactions) {
             LocalDate txDate = t.getTransactionDate().toLocalDate();
             if (txDate.isBefore(openingDate) || txDate.isAfter(closingDate)) {
