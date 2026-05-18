@@ -241,7 +241,7 @@ public class TransactionService {
         );
 
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
-        cq.orderBy(cb.desc(transaction.get("transactionDate")));
+        cq.orderBy(cb.asc(transaction.get("transactionDate")));
 
         return em.createQuery(cq)
                 .getResultList()

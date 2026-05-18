@@ -136,7 +136,7 @@ public class TransactionGroupService {
                 .collect(Collectors.toMap(Transaction::getId, t -> t));
         Set<String> processedIds = new HashSet<>();
 
-        // If groupGto has no transactions, then delete this group and all transaction belong to this group.
+        // If groupDto has no transactions, then delete this group and all transaction belong to this group.
         if (dto.getTransactions() == null || dto.getTransactions().isEmpty()) {
             for (Transaction tx : existing) {
                 transactionService.deleteTransaction(tx.getId(), user);
