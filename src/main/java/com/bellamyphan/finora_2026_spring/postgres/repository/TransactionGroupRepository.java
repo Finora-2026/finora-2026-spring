@@ -28,16 +28,19 @@ public interface TransactionGroupRepository extends JpaRepository<TransactionGro
     );
 
     @Query("""
-        SELECT DISTINCT g
+        SELECT g
         FROM TransactionGroup g
+        JOIN g.transactions tx
         WHERE g.user.id = :userId
           AND g.report IS NULL
           AND NOT EXISTS (
               SELECT 1
               FROM Transaction t
               WHERE t.transactionGroup = g
-              AND t.isPosted = false
+                AND t.isPosted = false
           )
+        GROUP BY g
+        ORDER BY MIN(tx.transactionDate) ASC
     """)
     List<TransactionGroup> findPostedAndUnreportedGroupsByUserId(String userId);
 
