@@ -61,6 +61,29 @@ public class TransactionGroupController {
         }
     }
 
+    @PutMapping("/{groupId}/repeatable")
+    public ResponseEntity<?> setTransactionGroupRepeatable(
+            @PathVariable String groupId, @RequestParam boolean repeatable) {
+        User user = jwtService.getCurrentUser();
+        try {
+            transactionGroupService.setTransactionGroupRepeatable(groupId, repeatable, user);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Transaction group repeatable flag updated successfully"
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "success", false,
+                    "message", "Failed to update repeatable flag: " + e.getMessage()
+            ));
+        }
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TransactionGroupResponseDto> getTransactionGroup(@PathVariable String id) {
         User user = jwtService.getCurrentUser();
