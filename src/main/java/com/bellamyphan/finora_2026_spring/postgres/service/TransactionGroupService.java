@@ -173,6 +173,23 @@ public class TransactionGroupService {
         }
     }
 
+    // ============================================================
+    // MARK GROUP AS REPEATABLE
+    // ============================================================
+    @Transactional
+    public void setTransactionGroupRepeatable(String groupId, boolean repeatable, User user) {
+        TransactionGroup group = transactionGroupRepository
+                .findByIdAndUserIdWithTransactions(groupId, user.getId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Transaction group not found with group id "
+                                + groupId
+                                + " and user id "
+                                + user.getId()
+                ));
+
+        group.setRepeatable(repeatable);
+    }
+
     private void validateTransactionList(TransactionGroupCreateDto dto) {
         // Ensure at least 1 transaction
         if (dto.getTransactions() == null || dto.getTransactions().isEmpty()) {
