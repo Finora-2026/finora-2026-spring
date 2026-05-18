@@ -99,4 +99,13 @@ public class TransactionGroupController {
                 "data", transactionGroupService.findAvailableReportGroups(user)
         ));
     }
+
+    @GetMapping("/repeatable")
+    public ResponseEntity<?> getRepeatableGroups() {
+        User user = jwtService.getCurrentUser();
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "data", transactionGroupService.findRepeatableGroups(user)
+        ));
+    }
 }
