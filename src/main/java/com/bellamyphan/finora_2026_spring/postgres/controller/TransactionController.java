@@ -1,14 +1,13 @@
 package com.bellamyphan.finora_2026_spring.postgres.controller;
 
 import com.bellamyphan.finora_2026_spring.postgres.dto.TransactionResponseDto;
+import com.bellamyphan.finora_2026_spring.postgres.dto.TransactionSearchRequestDto;
 import com.bellamyphan.finora_2026_spring.postgres.entity.User;
 import com.bellamyphan.finora_2026_spring.postgres.service.JwtService;
 import com.bellamyphan.finora_2026_spring.postgres.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,5 +27,17 @@ public class TransactionController {
         User user = jwtService.getCurrentUser();
         List<TransactionResponseDto> pendingTxs = transactionService.getPendingTransactionsForUser(user);
         return ResponseEntity.ok(pendingTxs);
+    }
+
+    /**
+     * Search for transactions
+     */
+    @PostMapping("/search")
+    public ResponseEntity<List<TransactionResponseDto>> searchTransactions(
+            @RequestBody TransactionSearchRequestDto searchDto
+    ) {
+        User user = jwtService.getCurrentUser();
+        List<TransactionResponseDto> results = transactionService.searchTransactions(searchDto, user);
+        return ResponseEntity.ok(results);
     }
 }

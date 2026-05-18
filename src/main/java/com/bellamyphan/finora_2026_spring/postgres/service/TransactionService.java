@@ -1,17 +1,27 @@
 package com.bellamyphan.finora_2026_spring.postgres.service;
 
 import com.bellamyphan.finora_2026_spring.postgres.dto.TransactionResponseDto;
+import com.bellamyphan.finora_2026_spring.postgres.dto.TransactionSearchRequestDto;
 import com.bellamyphan.finora_2026_spring.postgres.entity.*;
 import com.bellamyphan.finora_2026_spring.postgres.repository.TransactionRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
+
+    private final EntityManager em;
 
     private final TransactionRepository transactionRepository;
 
@@ -120,6 +130,124 @@ public class TransactionService {
         } else {
             transaction.setTransactionType(null);
         }
+    }
+
+    public List<TransactionResponseDto> searchTransactions(TransactionSearchRequestDto searchDto, User user) {
+
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Transaction> cq = cb.createQuery(Transaction.class);
+        Root<Transaction> transaction = cq.from(Transaction.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        // --------------------
+        // DATE FILTERS
+        // --------------------
+        if (searchDto.getStartDate() != null) {
+            predicates.add(
+                    cb.greaterThanOrEqualTo(
+                            transaction.get("transactionDate"),
+                            searchDto.getStartDate().atStartOfDay()
+                    )
+            );
+        }
+
+        if (searchDto.getEndDate() != null) {
+            predicates.add(
+                    cb.lessThanOrEqualTo(
+                            transaction.get("transactionDate"),
+                            searchDto.getEndDate().atTime(23, 59, 59)
+                    )
+            );
+        }
+
+        // --------------------
+        // AMOUNT FILTERS
+        // --------------------
+        if (searchDto.getMinAmount() != null) {
+            predicates.add(
+                    cb.greaterThanOrEqualTo(transaction.get("amount"), searchDto.getMinAmount())
+            );
+        }
+
+        if (searchDto.getMaxAmount() != null) {
+            predicates.add(
+                    cb.lessThanOrEqualTo(transaction.get("amount"), searchDto.getMaxAmount())
+            );
+        }
+
+        // --------------------
+        // BANK FILTER
+        // --------------------
+        if (StringUtils.hasText(searchDto.getBankId())) {
+            predicates.add(
+                    cb.equal(transaction.get("account").get("bank").get("id"), searchDto.getBankId())
+            );
+        }
+
+        // --------------------
+        // ACCOUNT FILTER (NEW)
+        // --------------------
+        if (StringUtils.hasText(searchDto.getAccountId())) {
+            predicates.add(
+                    cb.equal(transaction.get("account").get("id"), searchDto.getAccountId())
+            );
+        }
+
+        // --------------------
+        // BRAND FILTER
+        // --------------------
+        if (StringUtils.hasText(searchDto.getBrandId())) {
+            predicates.add(
+                    cb.equal(transaction.get("brand").get("id"), searchDto.getBrandId())
+            );
+        }
+
+        // --------------------
+        // LOCATION FILTER
+        // --------------------
+        if (StringUtils.hasText(searchDto.getLocationId())) {
+            predicates.add(
+                    cb.equal(transaction.get("location").get("id"), searchDto.getLocationId())
+            );
+        }
+
+        // --------------------
+        // TYPE FILTER (IMPORTANT FIX)
+        // --------------------
+        if (StringUtils.hasText(searchDto.getTypeId())) {
+            predicates.add(
+                    cb.equal(transaction.get("transactionType").get("id"), searchDto.getTypeId())
+            );
+        }
+
+        // --------------------
+        // NOTES SEARCH (LIKE)
+        // --------------------
+        if (StringUtils.hasText(searchDto.getNotes())) {
+            predicates.add(
+                    cb.like(
+                            cb.lower(transaction.get("notes")),
+                            "%" + searchDto.getNotes().toLowerCase() + "%"
+                    )
+            );
+        }
+
+        // --------------------
+        // USER OWNERSHIP FILTER (IMPORTANT)
+        // --------------------
+        predicates.add(
+                cb.equal(transaction.get("account").get("user").get("id"), user.getId())
+        );
+
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+        cq.orderBy(cb.desc(transaction.get("transactionDate")));
+
+        return em.createQuery(cq)
+                .getResultList()
+                .stream()
+                .map(TransactionResponseDto::fromEntity)
+                .toList();
     }
 
     // If user requests posting, validate FINAL STATE
