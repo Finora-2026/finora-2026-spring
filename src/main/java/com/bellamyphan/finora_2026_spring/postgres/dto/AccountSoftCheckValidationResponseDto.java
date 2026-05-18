@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountDateValidationResponseDto {
+public class AccountSoftCheckValidationResponseDto {
     private boolean valid;
 }

@@ -148,6 +148,47 @@ public class AccountService {
         return closing == null || !date.isAfter(closing);
     }
 
+    public boolean softCheckCanCloseAccount(String accountId, User user, LocalDate closingDate
+    ) {
+        if (accountId == null || accountId.isBlank()) {
+            throw new IllegalArgumentException("Account ID cannot be null or blank");
+        }
+        if (closingDate == null) {
+            throw new IllegalArgumentException("Closing date cannot be null");
+        }
+
+        // Verify ownership and get account
+        Account account = findAccountEntityByIdAndUser(accountId, user);
+
+        LocalDate openingDate = account.getOpeningDate() != null
+                ? account.getOpeningDate().toLocalDate()
+                : null;
+
+        if (openingDate == null) {
+            throw new IllegalStateException("Account opening date is null in the DB for this account id: " +  accountId);
+        }
+
+        // Rule 1: closing date cannot be before opening date
+        if (closingDate.isBefore(openingDate)) {
+            return false;
+        }
+
+        // Rule 2: all transactions must be within opening → closing range (proposed)
+        List<Transaction> transactions =
+                transactionRepository.findByAccount_Id(account.getUser().getId());
+        for (Transaction t : transactions) {
+            LocalDate txDate = t.getTransactionDate().toLocalDate();
+            if (txDate.isBefore(openingDate) || txDate.isAfter(closingDate)) {
+                return false;
+            }
+        }
+
+        // Rule 3: all transactions must be posted
+        boolean hasUnposted = transactions.stream()
+                .anyMatch(tx -> !tx.isPosted());
+        return !hasUnposted;
+    }
+
     public void validateTransactionDateForAccount(
             LocalDate date,
             String accountId,
