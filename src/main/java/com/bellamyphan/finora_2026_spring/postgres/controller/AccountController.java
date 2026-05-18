@@ -154,4 +154,13 @@ public class AccountController {
         User user = jwtService.getCurrentUser();
         return accountService.findInactiveAccountsByUser(user);
     }
+
+    // -----------------------
+    // GET all accounts filter by bank and user token
+    // -----------------------
+    @GetMapping("/by-bank")
+    public List<AccountResponseDto> getAccountsByBank(@RequestParam String bankId) {
+        User user = jwtService.getCurrentUser();
+        return accountService.findAllAccountsByUserAndBank(user, bankId);
+    }
 }
