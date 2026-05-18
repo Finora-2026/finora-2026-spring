@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,9 +33,29 @@ public class TransactionService {
     }
 
     public List<TransactionResponseDto> getPendingTransactionsForUser(User user) {
-        return transactionRepository.findByAccount_User_IdAndIsPostedFalse(user.getId())
+        // Fetch the pending transactions from the repository
+        List<TransactionResponseDto> transactions = transactionRepository
+                .findByAccount_User_IdAndIsPostedFalse(user.getId())
                 .stream()
                 .map(TransactionResponseDto::fromEntity)
+                .toList();
+
+        // Group by Group ID, sort the groups, and flatten back into a list
+        return transactions.stream()
+                // Group by GroupId -> Map<Long, List<TransactionResponseDto>>
+                .collect(Collectors.groupingBy(TransactionResponseDto::getTransactionGroupId))
+                .values() // Collection<List<TransactionResponseDto>>
+                .stream()
+                // Sort the lists (groups) by the max transaction date within each list
+                .sorted(Comparator.comparing(
+                        (List<TransactionResponseDto> group) -> group.stream()
+                                .map(TransactionResponseDto::getTransactionDate)
+                                .max(Comparator.naturalOrder())
+                                .orElse(java.time.LocalDateTime.MIN), // Fallback if group is empty
+                        Comparator.reverseOrder() // Latest date first
+                ))
+                // Flatten the sorted groups back into a single continuous stream
+                .flatMap(List::stream)
                 .collect(Collectors.toList());
     }
 
