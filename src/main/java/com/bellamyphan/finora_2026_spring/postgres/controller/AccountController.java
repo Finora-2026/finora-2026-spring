@@ -63,14 +63,25 @@ public class AccountController {
     }
 
     @GetMapping("/{id}/validate-date")
-    public ResponseEntity<AccountDateValidationResponseDto> validateAccountDate(
+    public ResponseEntity<AccountSoftCheckValidationResponseDto> validateAccountDate(
             @PathVariable String id,
             @RequestParam String dateTime
     ) {
         User user = jwtService.getCurrentUser();
         LocalDate date = LocalDate.parse(dateTime);
         boolean valid = accountService.softCheckValidDate(date, id, user);
-        return ResponseEntity.ok(new AccountDateValidationResponseDto(valid));
+        return ResponseEntity.ok(new AccountSoftCheckValidationResponseDto(valid));
+    }
+
+    @GetMapping("/{id}/validate-can-close")
+    public ResponseEntity<AccountSoftCheckValidationResponseDto> validateAccountCanBeClosed(
+            @PathVariable String id,
+            @RequestParam String closeDate
+    ) {
+        User user = jwtService.getCurrentUser();
+        LocalDate date = LocalDate.parse(closeDate);
+        boolean valid = accountService.softCheckCanCloseAccount(id, user, date);
+        return ResponseEntity.ok(new AccountSoftCheckValidationResponseDto(valid));
     }
 
     // -----------------------
