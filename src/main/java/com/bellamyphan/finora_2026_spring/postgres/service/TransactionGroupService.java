@@ -111,6 +111,16 @@ public class TransactionGroupService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<TransactionGroupResponseDto> findRepeatableGroups(User user) {
+        List<TransactionGroup> groups =
+                transactionGroupRepository.findRepeatableGroupsByUserId(user.getId());
+
+        return groups.stream()
+                .map(TransactionGroupResponseDto::fromEntity)
+                .toList();
+    }
+
     // ============================================================
     // UPDATE GROUP
     // ============================================================
