@@ -256,6 +256,23 @@ public class AccountService {
         return getAccountResponseDtos(accounts, user);
     }
 
+    public List<AccountResponseDto> findAllAccountsByUserAndBank(User user, String bankId) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+        if (bankId == null || bankId.isBlank()) {
+            throw new IllegalArgumentException("Bank ID cannot be null or blank");
+        }
+
+        List<Account> accounts = accountRepository
+                .findByUser_IdAndBank_Id(user.getId(), bankId)
+                .stream()
+                .sorted(Comparator.comparing(a -> a.getName().toLowerCase()))
+                .toList();
+
+        return getAccountResponseDtos(accounts, user);
+    }
+
     public Account findAccountEntityByIdAndUser(String accountId, User user) {
         if (accountId == null || accountId.isBlank()) {
             throw new IllegalArgumentException("Account ID cannot be null or blank");
