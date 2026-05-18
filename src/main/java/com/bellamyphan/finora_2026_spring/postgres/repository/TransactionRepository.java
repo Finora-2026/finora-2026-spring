@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, String> {
 
-    List<Transaction> findByAccount_User_IdAndIsPostedFalse(String userId);
+    List<Transaction> findByAccount_User_IdAndIsPostedFalseOrderByTransactionDateAsc(String userId);
 
     List<Transaction> findByAccount_IdAndAccount_User_Id(String accountId, String userId);
 
