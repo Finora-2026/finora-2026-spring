@@ -106,6 +106,24 @@ public class TransactionGroupController {
         }
     }
 
+    @PutMapping("/repeatable/disable-all")
+    public ResponseEntity<?> disableAllRepeatableGroups() {
+        User user = jwtService.getCurrentUser();
+        try {
+            int updatedCount = transactionGroupService.markAllRepeatableGroupsNotRepeatable(user);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "updatedCount", updatedCount,
+                    "message", "All repeatable transaction groups marked as not repeatable"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "success", false,
+                    "message", "Failed to disable repeatable transaction groups: " + e.getMessage()
+            ));
+        }
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TransactionGroupResponseDto> getTransactionGroup(@PathVariable String id) {
         User user = jwtService.getCurrentUser();

@@ -2,6 +2,7 @@ package com.bellamyphan.finora_2026_spring.postgres.repository;
 
 import com.bellamyphan.finora_2026_spring.postgres.entity.TransactionGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -54,4 +55,13 @@ public interface TransactionGroupRepository extends JpaRepository<TransactionGro
         ORDER BY MIN(tx.transactionDate) ASC
     """)
     List<TransactionGroup> findRepeatableGroupsByUserId(String userId);
+
+    @Modifying
+    @Query("""
+        UPDATE TransactionGroup g
+        SET g.isRepeatable = false
+        WHERE g.user.id = :userId
+          AND g.isRepeatable = true
+    """)
+    int markAllRepeatableGroupsNotRepeatableByUserId(String userId);
 }
