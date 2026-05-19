@@ -31,6 +31,28 @@ public class TransactionGroupController {
         ));
     }
 
+    @PostMapping("/repeat-all")
+    public ResponseEntity<?> repeatAllRepeatableGroups() {
+        User user = jwtService.getCurrentUser();
+        try {
+            transactionGroupService.repeatAllRepeatableGroups(user);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Repeatable transaction groups processed successfully"
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "success", false,
+                    "message", "Failed to repeat transaction groups: " + e.getMessage()
+            ));
+        }
+    }
+
     @PutMapping
     public ResponseEntity<?> updateTransactionGroup(@Valid @RequestBody TransactionGroupResponseDto dto) {
         // Validate group id

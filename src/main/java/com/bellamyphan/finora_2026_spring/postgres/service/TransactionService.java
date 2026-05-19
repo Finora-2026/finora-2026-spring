@@ -34,7 +34,6 @@ public class TransactionService {
     // @Transactional: Transaction group will be transactional and call this method
     // Because transactions must be created with a group.
     public void createTransactionFromEntity (Transaction transaction) {
-
         String newId = nanoIdService.generateUniqueId(transactionRepository);
         transaction.setId(newId);
         transactionRepository.save(transaction);
