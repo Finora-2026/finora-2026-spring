@@ -6,10 +6,12 @@ import com.bellamyphan.finora_2026_spring.postgres.dto.TransactionGroupResponseD
 import com.bellamyphan.finora_2026_spring.postgres.dto.TransactionResponseDto;
 import com.bellamyphan.finora_2026_spring.postgres.entity.*;
 import com.bellamyphan.finora_2026_spring.postgres.repository.TransactionGroupRepository;
+import com.bellamyphan.finora_2026_spring.utils.DateTimeHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +89,38 @@ public class TransactionGroupService {
         }
 
         return group.getId();
+    }
+
+    @Transactional
+    public void repeatAllRepeatableGroups(User user) {
+        List<TransactionGroup> repeatableGroups =
+                transactionGroupRepository.findRepeatableGroupsByUserId(user.getId());
+        LocalDateTime now = LocalDateTime.now();
+        for (TransactionGroup originalGroup : repeatableGroups) {
+            // Create new group
+            TransactionGroup newGroup = createAndSaveNewTransactionGroup(user);
+            for (Transaction originalTx : originalGroup.getTransactions()) {
+                Transaction newTx = new Transaction();
+                newTx.setTransactionGroup(newGroup);
+
+                // Smart repeated date
+                LocalDateTime repeatedDate = DateTimeHandler.getCurrentDateWithUpdatedMonth(
+                        originalTx.getTransactionDate(), now);
+                newTx.setTransactionDate(repeatedDate);
+
+                // Copy values
+                newTx.setAmount(originalTx.getAmount());
+                newTx.setNotes(originalTx.getNotes());
+                newTx.setAccount(originalTx.getAccount());
+                newTx.setBrand(originalTx.getBrand());
+                newTx.setLocation(originalTx.getLocation());
+                newTx.setTransactionType(originalTx.getTransactionType());
+
+                // Always pending
+                newTx.setPosted(false);
+                transactionService.createTransactionFromEntity(newTx);
+            }
+        }
     }
 
     // ============================================================
