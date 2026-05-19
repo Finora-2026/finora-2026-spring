@@ -154,6 +154,11 @@ public class TransactionGroupService {
                 .toList();
     }
 
+    @Transactional
+    public int markAllRepeatableGroupsNotRepeatable(User user) {
+        return transactionGroupRepository.markAllRepeatableGroupsNotRepeatableByUserId(user.getId());
+    }
+
     // ============================================================
     // UPDATE GROUP
     // ============================================================
