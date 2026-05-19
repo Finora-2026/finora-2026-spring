@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,41 +38,33 @@ public class TransactionGroupService {
     @Transactional
     public String createTransactionGroup(TransactionGroupCreateDto dto, User user) {
         validateTransactionList(dto);
-
         // Create and saved the new group
         TransactionGroup group = createAndSaveNewTransactionGroup(user);
-
         // Create new transactions and linked to transactionGroup
         for (TransactionCreateDto row : dto.getTransactions()) {
-
             // Get the account entity
             Account account = accountService.findAccountEntityByIdAndUser(row.getAccountId(), user);
-
             // Fetch brand if provided
             Brand brand = null;
             if (row.getBrandId() != null && !row.getBrandId().isEmpty()) {
                 brand = brandService.findBrandById(row.getBrandId());
             }
-
             // Fetch location if provided
             Location location = null;
             if (row.getLocationId() != null && !row.getLocationId().isEmpty()) {
                 location = locationService.findLocationById(row.getLocationId());
             }
-
             // Fetch transaction type
             TransactionType transactionType = null;
             if (row.getTransactionTypeId() != null && !row.getTransactionTypeId().isEmpty()) {
                 transactionType = transactionTypeService.findTransactionTypeById(row.getTransactionTypeId());
             }
-
             // Transaction date must be inside account active period
             accountService.validateTransactionDateForAccount(
                     row.getTransactionDate().toLocalDate(),
                     row.getAccountId(),
                     user
             );
-
             // Create a transaction entity
             Transaction tx = new Transaction();
             // Id will be handled in the transactionService
@@ -87,7 +80,6 @@ public class TransactionGroupService {
 
             transactionService.createTransactionFromEntity(tx);
         }
-
         return group.getId();
     }
 
@@ -96,7 +88,12 @@ public class TransactionGroupService {
         List<TransactionGroup> repeatableGroups =
                 transactionGroupRepository.findRepeatableGroupsByUserId(user.getId());
         LocalDateTime now = LocalDateTime.now();
+        YearMonth currentMonth = YearMonth.from(now);
         for (TransactionGroup originalGroup : repeatableGroups) {
+            if (originalGroup.getLastRepeatedAt() != null
+                    && YearMonth.from(originalGroup.getLastRepeatedAt()).equals(currentMonth)) {
+                continue;
+            }
             // Create new group
             TransactionGroup newGroup = createAndSaveNewTransactionGroup(user);
             for (Transaction originalTx : originalGroup.getTransactions()) {
@@ -120,6 +117,7 @@ public class TransactionGroupService {
                 newTx.setPosted(false);
                 transactionService.createTransactionFromEntity(newTx);
             }
+            originalGroup.setLastRepeatedAt(now);
         }
     }
 
@@ -250,9 +248,12 @@ public class TransactionGroupService {
 
     private TransactionGroup createAndSaveNewTransactionGroup(User user) {
         TransactionGroup newTransactionGroup = new TransactionGroup();
-        newTransactionGroup.setUser(user);
         String newId = nanoIdService.generateUniqueId(transactionGroupRepository);
         newTransactionGroup.setId(newId);
+        newTransactionGroup.setReport(null);
+        newTransactionGroup.setUser(user);
+        newTransactionGroup.setRepeatable(false);
+        newTransactionGroup.setLastRepeatedAt(null);
         return transactionGroupRepository.save(newTransactionGroup);
     }
 }
