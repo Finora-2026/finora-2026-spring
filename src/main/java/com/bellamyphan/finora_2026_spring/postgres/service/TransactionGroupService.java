@@ -80,6 +80,7 @@ public class TransactionGroupService {
 
             transactionService.createTransactionFromEntity(tx);
         }
+        markSourceGroupRepeated(dto.getRepeatedFromGroupId(), user);
         return group.getId();
     }
 
@@ -255,5 +256,22 @@ public class TransactionGroupService {
         newTransactionGroup.setRepeatable(false);
         newTransactionGroup.setLastRepeatedAt(null);
         return transactionGroupRepository.save(newTransactionGroup);
+    }
+
+    private void markSourceGroupRepeated(String repeatedFromGroupId, User user) {
+        if (repeatedFromGroupId == null || repeatedFromGroupId.isEmpty()) {
+            return;
+        }
+
+        TransactionGroup originalGroup = transactionGroupRepository
+                .findByIdAndUserIdWithTransactions(repeatedFromGroupId, user.getId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Transaction group not found with group id "
+                                + repeatedFromGroupId
+                                + " and user id "
+                                + user.getId()
+                ));
+
+        originalGroup.setLastRepeatedAt(LocalDateTime.now());
     }
 }
