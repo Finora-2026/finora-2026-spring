@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -30,6 +31,9 @@ public class TransactionGroup {
 
     @Column(name = "is_repeatable", nullable = false)
     private boolean isRepeatable = false;
+
+    @Column(name = "last_repeated_at")
+    private LocalDateTime lastRepeatedAt;
 
     // Link to transactions
     @OneToMany(mappedBy = "transactionGroup", fetch = FetchType.LAZY)
