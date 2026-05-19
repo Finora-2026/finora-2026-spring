@@ -14,5 +14,7 @@ public class TransactionGroupCreateDto {
     @NotEmpty(message = "Transaction group must contain at least one transaction")
     @Valid
     private List<TransactionCreateDto> transactions;
+
+    private String repeatedFromGroupId;
     
 }
