@@ -58,7 +58,8 @@ public class SecurityConfig {
                                 "/brands/**",
                                 "/transactions/**",
                                 "/transaction-groups/**",
-                                "/transaction-types/**"
+                                "/transaction-types/**",
+                                "/reports/**"
                         )
                         .hasRole("USER")
 
