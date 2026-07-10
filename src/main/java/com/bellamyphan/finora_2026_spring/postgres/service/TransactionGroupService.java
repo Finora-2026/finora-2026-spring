@@ -255,6 +255,31 @@ public class TransactionGroupService {
         group.setRepeatable(repeatable);
     }
 
+    @Transactional
+    public void removeGroupFromReport(String groupId, User user) {
+        TransactionGroup group = transactionGroupRepository
+                .findByIdAndUser(groupId, user)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Transaction group not found")
+                );
+
+        if (group.getReport() == null) {
+            throw new IllegalArgumentException(
+                    "Transaction group is not attached to any report"
+            );
+        }
+
+        Report report = group.getReport();
+        if (report.isPosted()) {
+            throw new IllegalStateException(
+                    "Cannot remove transaction group from a report that is alread posted"
+            );
+        }
+
+        group.setReport(null);
+        transactionGroupRepository.save(group);
+    }
+
     private void validateTransactionList(TransactionGroupCreateDto dto) {
         // Ensure at least 1 transaction
         if (dto.getTransactions() == null || dto.getTransactions().isEmpty()) {

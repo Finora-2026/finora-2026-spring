@@ -158,4 +158,29 @@ public class TransactionGroupController {
                 "data", transactionGroupService.findRepeatableGroups(user)
         ));
     }
+
+    @DeleteMapping("/{groupId}/report")
+    public ResponseEntity<?> removeGroupFromReport(@PathVariable String groupId) {
+        User user = jwtService.getCurrentUser();
+
+        try {
+            transactionGroupService.removeGroupFromReport(groupId, user);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Transaction group removed from report successfully"
+            ));
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "success", false,
+                    "message", "Failed to remove transaction group from report: " + e.getMessage()
+            ));
+        }
+    }
 }
