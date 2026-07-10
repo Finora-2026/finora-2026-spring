@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/reports")
 @RequiredArgsConstructor
@@ -40,6 +42,23 @@ public class ReportController {
         return reportService.getCurrentPendingReport(user)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{reportId}/load-all-transactions")
+    public ResponseEntity<?> loadAllTransactions(@PathVariable String reportId) {
+        User user = jwtService.getCurrentUser();
+        try {
+            return reportService.loadAllTransactions(reportId, user)
+                    .<ResponseEntity<?>>map(loadedGroupCount -> ResponseEntity.ok(Map.of(
+                            "message", "Transactions loaded into report",
+                            "loadedGroupCount", loadedGroupCount
+                    )))
+                    .orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message", e.getMessage()
+            ));
+        }
     }
 
     @GetMapping("/last-posted")
