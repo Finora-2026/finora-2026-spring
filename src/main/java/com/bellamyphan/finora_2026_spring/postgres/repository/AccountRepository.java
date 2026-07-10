@@ -3,6 +3,7 @@ package com.bellamyphan.finora_2026_spring.postgres.repository;
 import com.bellamyphan.finora_2026_spring.postgres.entity.Account;
 import com.bellamyphan.finora_2026_spring.postgres.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,6 +13,15 @@ import java.util.Optional;
 public interface AccountRepository extends JpaRepository<Account, String> {
 
     List<Account> findByUser(User user);
+
+    @Query("""
+        SELECT a
+        FROM Account a
+        JOIN FETCH a.bank
+        JOIN FETCH a.accountType
+        WHERE a.user.id = :userId
+    """)
+    List<Account> findAllByUserIdWithDetails(String userId);
 
     Optional<Account> findByIdAndUser_Id(String accountId, String userId);
 

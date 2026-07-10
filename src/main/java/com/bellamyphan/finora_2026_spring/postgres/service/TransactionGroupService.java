@@ -143,7 +143,7 @@ public class TransactionGroupService {
             String reportId,
             User user) {
         List<TransactionGroup> groups =
-                transactionGroupRepository.findAllByReportIdAndUserId(
+                transactionGroupRepository.findAllByReportIdAndUserIdWithTransactions(
                         reportId,
                         user.getId()
                 );

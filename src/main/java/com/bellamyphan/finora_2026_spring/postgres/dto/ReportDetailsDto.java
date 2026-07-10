@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -16,6 +17,7 @@ public class ReportDetailsDto {
     private LocalDate month;
     private ReportStatus reportStatus;
 
-    // todo: calculate report type summary
-    // todo: calculate report account summary
+    private List<ReportTypeSummaryDto> typeSummary = List.of();
+    private List<ReportAccountSummaryDto> accountSummary = List.of();
+
 }
