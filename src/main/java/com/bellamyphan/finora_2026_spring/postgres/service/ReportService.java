@@ -179,6 +179,72 @@ public class ReportService {
         return Optional.of(dto);
     }
 
+    @Transactional(readOnly = true)
+    public Optional<String> generateTransactionsCsv(User user, String reportId) {
+        Optional<Report> reportOptional = reportRepository.findByIdAndUser(reportId, user);
+        if (reportOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<TransactionGroup> groups = transactionGroupRepository
+                .findAllByReportIdAndUserIdWithTransactions(reportId, user.getId())
+                .stream()
+                .sorted(Comparator.comparing(group -> group.getTransactions().stream()
+                        .map(Transaction::getTransactionDate)
+                        .min(Comparator.naturalOrder())
+                        .orElse(null), Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
+
+        StringBuilder csv = new StringBuilder();
+        appendCsvLine(csv, List.of(
+                "Report ID",
+                "Report Month",
+                "Group ID",
+                "Transaction ID",
+                "Transaction Date",
+                "Amount",
+                "Account",
+                "Bank",
+                "Brand",
+                "Location",
+                "Transaction Type",
+                "Posted",
+                "Notes"
+        ));
+
+        Report report = reportOptional.get();
+        for (TransactionGroup group : groups) {
+            List<Transaction> transactions = group.getTransactions().stream()
+                    .sorted(Comparator.comparing(Transaction::getTransactionDate))
+                    .toList();
+
+            for (Transaction transaction : transactions) {
+                Account account = transaction.getAccount();
+                appendCsvLine(csv, List.of(
+                        report.getId(),
+                        nullable(report.getMonth()),
+                        group.getId(),
+                        transaction.getId(),
+                        nullable(transaction.getTransactionDate()),
+                        nullable(transaction.getAmount()),
+                        account != null ? nullable(account.getName()) : "",
+                        account != null && account.getBank() != null ? nullable(account.getBank().getName()) : "",
+                        transaction.getBrand() != null ? nullable(transaction.getBrand().getName()) : "",
+                        transaction.getLocation() != null
+                                ? transaction.getLocation().getCity() + ", " + transaction.getLocation().getState()
+                                : "",
+                        transaction.getTransactionType() != null
+                                ? nullable(transaction.getTransactionType().getName())
+                                : "",
+                        String.valueOf(transaction.isPosted()),
+                        nullable(transaction.getNotes())
+                ));
+            }
+        }
+
+        return Optional.of(csv.toString());
+    }
+
     private List<ReportTypeSummaryDto> calculateTypeSummary(List<TransactionGroup> groups) {
         Map<String, ReportTypeSummaryDto> summariesByTypeId = new LinkedHashMap<>();
 
@@ -265,5 +331,24 @@ public class ReportService {
         }
 
         return summariesByAccountId.values().stream().toList();
+    }
+
+    private void appendCsvLine(StringBuilder csv, List<String> values) {
+        csv.append(values.stream()
+                .map(this::csvValue)
+                .reduce((left, right) -> left + "," + right)
+                .orElse(""));
+        csv.append("\n");
+    }
+
+    private String csvValue(String value) {
+        if (value == null) {
+            return "";
+        }
+        return "\"" + value.replace("\"", "\"\"") + "\"";
+    }
+
+    private String nullable(Object value) {
+        return value != null ? String.valueOf(value) : "";
     }
 }

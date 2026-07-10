@@ -7,9 +7,12 @@ import com.bellamyphan.finora_2026_spring.postgres.entity.User;
 import com.bellamyphan.finora_2026_spring.postgres.service.JwtService;
 import com.bellamyphan.finora_2026_spring.postgres.service.ReportService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @RestController
@@ -59,6 +62,24 @@ public class ReportController {
                     "message", e.getMessage()
             ));
         }
+    }
+
+    @GetMapping("/{reportId}/download")
+    public ResponseEntity<byte[]> downloadReportTransactions(@PathVariable String reportId) {
+        User user = jwtService.getCurrentUser();
+        return reportService.generateTransactionsCsv(user, reportId)
+                .map(csv -> {
+                    byte[] content = csv.getBytes(StandardCharsets.UTF_8);
+                    return ResponseEntity.ok()
+                            .header(
+                                    HttpHeaders.CONTENT_DISPOSITION,
+                                    "attachment; filename=\"report-" + reportId + "-transactions.csv\""
+                            )
+                            .contentType(MediaType.parseMediaType("text/csv"))
+                            .contentLength(content.length)
+                            .body(content);
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/last-posted")
