@@ -221,6 +221,15 @@ public class TransactionService {
         }
 
         // --------------------
+        // REPORT FILTER
+        // --------------------
+        if (StringUtils.hasText(searchDto.getReportId())) {
+            predicates.add(
+                    cb.equal(transaction.get("transactionGroup").get("report").get("id"), searchDto.getReportId())
+            );
+        }
+
+        // --------------------
         // NOTES SEARCH (LIKE)
         // --------------------
         if (StringUtils.hasText(searchDto.getNotes())) {

@@ -19,5 +19,6 @@ public class TransactionSearchRequestDto {
     private String brandId;
     private String locationId;
     private String typeId;
+    private String reportId;
     private String notes;
 }
