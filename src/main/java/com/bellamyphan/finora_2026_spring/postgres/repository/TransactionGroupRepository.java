@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +29,11 @@ public interface TransactionGroupRepository extends JpaRepository<TransactionGro
             String userId
     );
 
+    List<TransactionGroup> findAllByReportIdAndUserId(
+            String reportId,
+            String userId
+    );
+
     @Query("""
         SELECT g
         FROM TransactionGroup g
@@ -44,6 +50,24 @@ public interface TransactionGroupRepository extends JpaRepository<TransactionGro
         ORDER BY MIN(tx.transactionDate) ASC
     """)
     List<TransactionGroup> findPostedAndUnreportedGroupsByUserId(String userId);
+
+    /**
+     * Finds the minimum transaction date across all groups that are completely posted and unreported.
+     */
+    @Query("""
+        SELECT MIN(tx.transactionDate)
+        FROM TransactionGroup g
+        JOIN g.transactions tx
+        WHERE g.user.id = :userId
+          AND g.report IS NULL
+          AND NOT EXISTS (
+              SELECT 1
+              FROM Transaction t
+              WHERE t.transactionGroup = g
+                AND t.isPosted = false
+          )
+    """)
+    Optional<LocalDate> findMinTransactionDateForPostedAndUnreported(String userId);
 
     @Query("""
         SELECT g
