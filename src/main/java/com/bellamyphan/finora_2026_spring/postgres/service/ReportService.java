@@ -4,8 +4,11 @@ import com.bellamyphan.finora_2026_spring.postgres.constant.ReportStatus;
 import com.bellamyphan.finora_2026_spring.postgres.dto.ReportCreateDto;
 import com.bellamyphan.finora_2026_spring.postgres.dto.ReportDetailsDto;
 import com.bellamyphan.finora_2026_spring.postgres.dto.ReportDto;
+import com.bellamyphan.finora_2026_spring.postgres.dto.ReportTypeSummaryDto;
 import com.bellamyphan.finora_2026_spring.postgres.entity.Report;
+import com.bellamyphan.finora_2026_spring.postgres.entity.Transaction;
 import com.bellamyphan.finora_2026_spring.postgres.entity.TransactionGroup;
+import com.bellamyphan.finora_2026_spring.postgres.entity.TransactionType;
 import com.bellamyphan.finora_2026_spring.postgres.entity.User;
 import com.bellamyphan.finora_2026_spring.postgres.repository.ReportRepository;
 import com.bellamyphan.finora_2026_spring.postgres.repository.TransactionGroupRepository;
@@ -13,8 +16,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -138,6 +145,47 @@ public class ReportService {
                         dto.setNextReportId(next.getId())
                 );
 
+        List<TransactionGroup> groups = transactionGroupRepository
+                .findAllByReportIdAndUserIdWithTransactions(reportId, user.getId());
+        dto.setTypeSummary(calculateTypeSummary(groups));
+
         return Optional.of(dto);
+    }
+
+    private List<ReportTypeSummaryDto> calculateTypeSummary(List<TransactionGroup> groups) {
+        Map<String, ReportTypeSummaryDto> summariesByTypeId = new LinkedHashMap<>();
+
+        for (TransactionGroup group : groups) {
+            for (Transaction transaction : group.getTransactions()) {
+                TransactionType transactionType = transaction.getTransactionType();
+                String transactionTypeId = transactionType != null
+                        ? transactionType.getId()
+                        : null;
+                String transactionTypeName = transactionType != null
+                        ? transactionType.getName().name()
+                        : null;
+                String summaryKey = transactionTypeId != null
+                        ? transactionTypeId
+                        : "UNCATEGORIZED";
+
+                ReportTypeSummaryDto summary = summariesByTypeId.computeIfAbsent(
+                        summaryKey,
+                        ignored -> new ReportTypeSummaryDto(
+                                transactionTypeId,
+                                transactionTypeName,
+                                BigDecimal.ZERO
+                        )
+                );
+                summary.setTotalAmount(summary.getTotalAmount().add(transaction.getAmount()));
+            }
+        }
+
+        return summariesByTypeId.values()
+                .stream()
+                .sorted(Comparator.comparing(
+                        ReportTypeSummaryDto::getTransactionTypeName,
+                        Comparator.nullsLast(String::compareTo)
+                ))
+                .toList();
     }
 }

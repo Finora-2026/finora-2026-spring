@@ -41,6 +41,22 @@ public interface TransactionGroupRepository extends JpaRepository<TransactionGro
     );
 
     @Query("""
+        SELECT DISTINCT g
+        FROM TransactionGroup g
+        LEFT JOIN FETCH g.transactions tx
+        LEFT JOIN FETCH tx.account
+        LEFT JOIN FETCH tx.brand
+        LEFT JOIN FETCH tx.location
+        LEFT JOIN FETCH tx.transactionType
+        WHERE g.report.id = :reportId
+          AND g.user.id = :userId
+    """)
+    List<TransactionGroup> findAllByReportIdAndUserIdWithTransactions(
+            String reportId,
+            String userId
+    );
+
+    @Query("""
         SELECT g
         FROM TransactionGroup g
         JOIN g.transactions tx
