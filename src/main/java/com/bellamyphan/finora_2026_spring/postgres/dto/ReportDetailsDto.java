@@ -18,6 +18,6 @@ public class ReportDetailsDto {
     private ReportStatus reportStatus;
 
     private List<ReportTypeSummaryDto> typeSummary = List.of();
+    private List<ReportAccountSummaryDto> accountSummary = List.of();
 
-    // todo: calculate report account summary
 }

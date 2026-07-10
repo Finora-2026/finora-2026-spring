@@ -2,14 +2,17 @@ package com.bellamyphan.finora_2026_spring.postgres.service;
 
 import com.bellamyphan.finora_2026_spring.postgres.constant.ReportStatus;
 import com.bellamyphan.finora_2026_spring.postgres.dto.ReportCreateDto;
+import com.bellamyphan.finora_2026_spring.postgres.dto.ReportAccountSummaryDto;
 import com.bellamyphan.finora_2026_spring.postgres.dto.ReportDetailsDto;
 import com.bellamyphan.finora_2026_spring.postgres.dto.ReportDto;
 import com.bellamyphan.finora_2026_spring.postgres.dto.ReportTypeSummaryDto;
+import com.bellamyphan.finora_2026_spring.postgres.entity.Account;
 import com.bellamyphan.finora_2026_spring.postgres.entity.Report;
 import com.bellamyphan.finora_2026_spring.postgres.entity.Transaction;
 import com.bellamyphan.finora_2026_spring.postgres.entity.TransactionGroup;
 import com.bellamyphan.finora_2026_spring.postgres.entity.TransactionType;
 import com.bellamyphan.finora_2026_spring.postgres.entity.User;
+import com.bellamyphan.finora_2026_spring.postgres.repository.AccountRepository;
 import com.bellamyphan.finora_2026_spring.postgres.repository.ReportRepository;
 import com.bellamyphan.finora_2026_spring.postgres.repository.TransactionGroupRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,7 @@ public class ReportService {
 
     private final ReportRepository reportRepository;
     private final TransactionGroupRepository transactionGroupRepository;
+    private final AccountRepository accountRepository;
 
     @Transactional
     public ReportCreateDto createNewReport(User user) {
@@ -148,6 +152,7 @@ public class ReportService {
         List<TransactionGroup> groups = transactionGroupRepository
                 .findAllByReportIdAndUserIdWithTransactions(reportId, user.getId());
         dto.setTypeSummary(calculateTypeSummary(groups));
+        dto.setAccountSummary(calculateAccountSummary(user, groups));
 
         return Optional.of(dto);
     }
@@ -187,5 +192,56 @@ public class ReportService {
                         Comparator.nullsLast(String::compareTo)
                 ))
                 .toList();
+    }
+
+    private List<ReportAccountSummaryDto> calculateAccountSummary(
+            User user,
+            List<TransactionGroup> groups
+    ) {
+        Map<String, ReportAccountSummaryDto> summariesByAccountId = new LinkedHashMap<>();
+        List<Account> accounts = accountRepository.findAllByUserIdWithDetails(user.getId())
+                .stream()
+                .sorted(Comparator
+                        .comparing((Account account) -> account.getBank().getName(), String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(Account::getName, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+
+        for (Account account : accounts) {
+            summariesByAccountId.put(
+                    account.getId(),
+                    new ReportAccountSummaryDto(
+                            account.getId(),
+                            account.getName(),
+                            account.getBank().getId(),
+                            account.getBank().getName(),
+                            account.getAccountType().getName(),
+                            BigDecimal.ZERO
+                    )
+            );
+        }
+
+        for (TransactionGroup group : groups) {
+            for (Transaction transaction : group.getTransactions()) {
+                Account account = transaction.getAccount();
+                if (account == null) {
+                    continue;
+                }
+
+                ReportAccountSummaryDto summary = summariesByAccountId.computeIfAbsent(
+                        account.getId(),
+                        ignored -> new ReportAccountSummaryDto(
+                                account.getId(),
+                                account.getName(),
+                                account.getBank() != null ? account.getBank().getId() : null,
+                                account.getBank() != null ? account.getBank().getName() : null,
+                                account.getAccountType() != null ? account.getAccountType().getName() : null,
+                                BigDecimal.ZERO
+                        )
+                );
+                summary.setBalance(summary.getBalance().add(transaction.getAmount()));
+            }
+        }
+
+        return summariesByAccountId.values().stream().toList();
     }
 }
