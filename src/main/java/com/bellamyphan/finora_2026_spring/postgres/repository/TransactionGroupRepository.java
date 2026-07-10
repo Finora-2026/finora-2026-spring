@@ -1,6 +1,7 @@
 package com.bellamyphan.finora_2026_spring.postgres.repository;
 
 import com.bellamyphan.finora_2026_spring.postgres.entity.TransactionGroup;
+import com.bellamyphan.finora_2026_spring.postgres.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -27,6 +28,11 @@ public interface TransactionGroupRepository extends JpaRepository<TransactionGro
     Optional<TransactionGroup> findByIdAndUserIdWithTransactions(
             String id,
             String userId
+    );
+
+    Optional<TransactionGroup> findByIdAndUser(
+            String id,
+            User user
     );
 
     List<TransactionGroup> findAllByReportIdAndUserId(
