@@ -2,6 +2,7 @@ package com.bellamyphan.finora_2026_spring.postgres.service;
 
 import com.bellamyphan.finora_2026_spring.postgres.constant.ReportStatus;
 import com.bellamyphan.finora_2026_spring.postgres.dto.ReportCreateDto;
+import com.bellamyphan.finora_2026_spring.postgres.dto.ReportDetailsDto;
 import com.bellamyphan.finora_2026_spring.postgres.dto.ReportDto;
 import com.bellamyphan.finora_2026_spring.postgres.entity.Report;
 import com.bellamyphan.finora_2026_spring.postgres.entity.TransactionGroup;
@@ -101,5 +102,39 @@ public class ReportService {
         return reportRepository
                 .findTopByUserAndIsPostedFalseOrderByMonthDesc(user)
                 .map(ReportDto::new);
+    }
+
+    public Optional<ReportDetailsDto> getReportDetails(User user, String reportId) {
+
+        Optional<Report> reportOptional = reportRepository.findByIdAndUser(reportId, user);
+        if (reportOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Report report = reportOptional.get();
+        ReportDetailsDto dto = new ReportDetailsDto();
+        dto.setCurrentReportId(report.getId());
+        dto.setMonth(report.getMonth());
+        dto.setReportStatus(
+                report.isPosted()
+                        ? ReportStatus.POSTED
+                        : ReportStatus.PENDING
+        );
+
+        // Previous report
+        reportRepository
+                .findTopByUserAndMonthBeforeOrderByMonthDesc(user, report.getMonth())
+                .ifPresent(previous ->
+                        dto.setPreviousReportId(previous.getId())
+                );
+
+        // Next report
+        reportRepository
+                .findTopByUserAndMonthAfterOrderByMonthAsc(user, report.getMonth())
+                .ifPresent(next ->
+                        dto.setNextReportId(next.getId())
+                );
+
+        return Optional.of(dto);
     }
 }
