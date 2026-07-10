@@ -92,18 +92,21 @@ public class ReportService {
         return dto;
     }
 
+    @Transactional(readOnly = true)
     public Optional<ReportDto> getLastPostedReport(User user) {
         return reportRepository
                 .findTopByUserAndIsPostedTrueOrderByMonthDesc(user)
                 .map(ReportDto::new);
     }
 
+    @Transactional(readOnly = true)
     public Optional<ReportDto> getCurrentPendingReport(User user) {
         return reportRepository
                 .findTopByUserAndIsPostedFalseOrderByMonthDesc(user)
                 .map(ReportDto::new);
     }
 
+    @Transactional(readOnly = true)
     public Optional<ReportDetailsDto> getReportDetails(User user, String reportId) {
 
         Optional<Report> reportOptional = reportRepository.findByIdAndUser(reportId, user);

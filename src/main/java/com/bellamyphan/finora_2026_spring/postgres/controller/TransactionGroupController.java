@@ -131,6 +131,16 @@ public class TransactionGroupController {
         return ResponseEntity.ok(dto);
     }
 
+    @GetMapping("/report/{reportId}")
+    public ResponseEntity<?> getTransactionGroupsByReport(
+            @PathVariable String reportId) {
+        User user = jwtService.getCurrentUser();
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "data", transactionGroupService.findGroupsByReportId(reportId, user)
+        ));
+    }
+
     @GetMapping("/available-report-groups")
     public ResponseEntity<?> getAvailableReportGroups() {
         User user = jwtService.getCurrentUser();

@@ -135,6 +135,23 @@ public class TransactionGroupService {
         return TransactionGroupResponseDto.fromEntity(group);
     }
 
+    // ============================================================
+    // LOAD GROUPS BY REPORT ID
+    // ============================================================
+    @Transactional(readOnly = true)
+    public List<TransactionGroupResponseDto> findGroupsByReportId(
+            String reportId,
+            User user) {
+        List<TransactionGroup> groups =
+                transactionGroupRepository.findAllByReportIdAndUserId(
+                        reportId,
+                        user.getId()
+                );
+        return groups.stream()
+                .map(TransactionGroupResponseDto::fromEntity)
+                .toList();
+    }
+
     @Transactional(readOnly = true)
     public List<TransactionGroupResponseDto> findAvailableReportGroups(User user) {
         List<TransactionGroup> groups =

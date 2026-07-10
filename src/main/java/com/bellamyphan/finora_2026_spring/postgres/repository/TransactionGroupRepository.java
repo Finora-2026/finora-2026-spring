@@ -29,6 +29,11 @@ public interface TransactionGroupRepository extends JpaRepository<TransactionGro
             String userId
     );
 
+    List<TransactionGroup> findAllByReportIdAndUserId(
+            String reportId,
+            String userId
+    );
+
     @Query("""
         SELECT g
         FROM TransactionGroup g
