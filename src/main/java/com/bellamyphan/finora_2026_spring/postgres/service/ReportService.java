@@ -117,6 +117,28 @@ public class ReportService {
                 .map(ReportDto::new);
     }
 
+    @Transactional
+    public Optional<Integer> loadAllTransactions(String reportId, User user) {
+        Optional<Report> reportOptional = reportRepository.findByIdAndUser(reportId, user);
+        if (reportOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Report report = reportOptional.get();
+        if (report.isPosted()) {
+            throw new IllegalArgumentException("Cannot load transactions into a posted report");
+        }
+
+        List<TransactionGroup> availableGroups = transactionGroupRepository
+                .findPostedAndUnreportedGroupsByUserId(user.getId());
+        for (TransactionGroup group : availableGroups) {
+            group.setReport(report);
+        }
+        transactionGroupRepository.saveAll(availableGroups);
+
+        return Optional.of(availableGroups.size());
+    }
+
     @Transactional(readOnly = true)
     public Optional<ReportDetailsDto> getReportDetails(User user, String reportId) {
 
